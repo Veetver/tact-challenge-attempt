@@ -24,15 +24,6 @@ contract Task2 with Deployable {
   init(admin: Address) {
     self.admin = admin;
   }
-
-  receive() {
-      send(SendParameters{
-      to: self.admin,
-      value: 0,
-      mode: SendRemainingValue + SendIgnoreErrors,
-      body: beginCell().storeAddress(context().sender).endCell()
-    });
-  }
   
   receive(msg: Refund) {
     require(msg.sender == self.admin, "Only admin allows to refund");
@@ -49,7 +40,7 @@ contract Task2 with Deployable {
       to: self.admin,
       value: 0,
       mode: SendRemainingValue + SendIgnoreErrors,
-      body: beginCell().storeSlice(msg).storeAddress(sender()).endCell()
+      body: beginCell().storeRef(msg.asCell()).storeAddress(sender()).endCell()
     });
   }
 }
