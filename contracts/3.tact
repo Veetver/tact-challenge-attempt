@@ -70,7 +70,7 @@ contract Task3 with Deployable {
   } 
   
   get fun price(jetton: Address): Int {
-
+return 0;
   }
   
   get fun balance(jetton: Address): Int {
