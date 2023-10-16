@@ -33,10 +33,10 @@ import "@stdlib/deploy";
 */
 
 message(0x7362d09c) TokenNotification {
-    queryId: Int as uint64;
-    amount: Int as coins;
-    from: Address;
-    forwardPayload: Slice as remaining;
+    queryId: Int as uint64; // Бесполезное число
+    amount: Int as coins;  // Кол-во полученных жетонов
+    from: Address;         // Адрес пользователя отправившего жетоны
+    forwardPayload: Slice as remaining; // что-то
 }
 
 // To simplify the testing process and the specificity of the messages being sent, we decided to add clear default values in this transaction
@@ -76,7 +76,6 @@ contract Task3 with Deployable {
         self.bAmount = self.bAmount + msg.amount;
       }
     } else {
-       
       let coinsToSend: Int = 0;
       let isEnough: Bool = false;
       let jettonReciever: Address = self.jettonAddressA;
@@ -84,13 +83,16 @@ contract Task3 with Deployable {
         // amountOfBJettonToSend in A->B
         coinsToSend = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
         isEnough = self.bAmount >= coinsToSend;
-        jettonReciever = self.jettonAddressB;
+        jettonReciever = self.jettonAddressA;
       } else {
         // amountOfAJettonToSend in B->A
         coinsToSend = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
         isEnough = self.aAmount >= coinsToSend;
-        jettonReciever = self.jettonAddressA;
+        jettonReciever = self.jettonAddressB;
       }
+
+      dump(coinsToSend);
+      dump(isEnough);
 
       // Проверка наличия достаточного кол-ва монет 
       if (isEnough) {
@@ -110,21 +112,21 @@ contract Task3 with Deployable {
           }.toCell()
       });
       } else {
-        // Вернуть монеты владельцу
-      //   send(SendParameters{
-      //   to: context().sender,
-      //   value: 0,
-      //   mode: SendRemainingValue,
-      //   body: TokenTransfer {
-      //     queryId: 0,
-      //     amount: msg.amount, // should be amount of jettons to send
-      //     destination: msg.from,
-      //     responseDestination: myAddress(),
-      //     customPayload: null,
-      //     forwardTonAmount: ton("0.01"),
-      //     forwardPayload: emptySlice()
-      //     }.toCell()
-      // });
+        // Вернуть монеты владельцу **Работает**
+        send(SendParameters{
+        to: context().sender,
+        value: 0,
+        mode: SendRemainingValue,
+        body: TokenTransfer {
+          queryId: 0,
+          amount: msg.amount,
+          destination: msg.from,
+          responseDestination: myAddress(),
+          customPayload: null,
+          forwardTonAmount: ton("0.01"),
+          forwardPayload: emptySlice()
+          }.toCell()
+      });
       }
     }
   } 
