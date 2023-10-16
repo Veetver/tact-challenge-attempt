@@ -1,20 +1,19 @@
 import "@stdlib/deploy";
 
 message(0x7362d09c) TokenNotification {
-    queryId: Int as uint64; // Бесполезное число
-    amount: Int as coins;  // Кол-во полученных жетонов
-    from: Address;         // Адрес пользователя отправившего жетоны
-    forwardPayload: Slice as remaining; // что-то
-}
-// To simplify the testing process and the specificity of the messages being sent, we decided to add clear default values in this transaction
+    queryId: Int as uint64;
+    amount: Int as coins;
+    from: Address;
+    forwardPayload: Slice as remaining;
+
 message(0xf8a7ea5) TokenTransfer {
-     queryId: Int as uint64; // should be 0
-     amount: Int as coins; // should be amount of jettons to send
-     destination: Address; // should be user address / TokenNotification.from
-     responseDestination: Address?; // should be myAddress()
-     customPayload: Cell?; // should be null
-     forwardTonAmount: Int as coins; // should be ton("0.01")
-     forwardPayload: Slice as remaining; // should be emptySlice()
+     queryId: Int as uint64;
+     amount: Int as coins;
+     destination: Address;
+     responseDestination: Address?;
+     customPayload: Cell?;
+     forwardTonAmount: Int as coins;
+     forwardPayload: Slice as remaining;
 }
 
 contract Task3 with Deployable {
@@ -50,23 +49,15 @@ contract Task3 with Deployable {
 
 
       if (sender() == self.jettonAddressA) {
-        // amountOfBJettonToSend in A->B
-        // How much coins B
         coinsToSend = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
         isEnough = coinsToSend <= self.bAmount;
         jettonReciever = self.jettonAddressB;
       } else {
-        // amountOfAJettonToSend in B->A
-        // How much coins A
         coinsToSend = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
         isEnough = coinsToSend <= self.aAmount;
         jettonReciever = self.jettonAddressA;
       }
-
-
-      // Проверка наличия достаточного кол-ва монет 
       if (isEnough) {
-        // Обновить значения Task3
         if (jettonReciever == self.jettonAddressA) {
           self.bAmount = self.bAmount - coinsToSend;
           self.aAmount = self.aAmount + msg.amount;
@@ -74,8 +65,6 @@ contract Task3 with Deployable {
         self.aAmount = self.aAmount - coinsToSend;
         self.bAmount = self.bAmount + msg.amount;
         }
-
-        // Сконвертировать и отправить монеты
         send(SendParameters{
         to: jettonReciever,
         value: 0,
@@ -92,7 +81,6 @@ contract Task3 with Deployable {
       });
 
       } else {
-        // Вернуть монеты владельцу **Работает**
         send(SendParameters{
         to: sender(),
         value: 0,
