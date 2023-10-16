@@ -111,20 +111,20 @@ contract Task3 with Deployable {
       });
       } else {
         // Вернуть монеты владельцу
-        send(SendParameters{
-        to: context().sender,
-        value: 0,
-        mode: SendRemainingValue,
-        body: TokenTransfer {
-          queryId: 0,
-          amount: msg.amount, // should be amount of jettons to send
-          destination: msg.from,
-          responseDestination: myAddress(),
-          customPayload: null,
-          forwardTonAmount: ton("0.01"),
-          forwardPayload: emptySlice()
-          }.toCell()
-      });
+      //   send(SendParameters{
+      //   to: context().sender,
+      //   value: 0,
+      //   mode: SendRemainingValue,
+      //   body: TokenTransfer {
+      //     queryId: 0,
+      //     amount: msg.amount, // should be amount of jettons to send
+      //     destination: msg.from,
+      //     responseDestination: myAddress(),
+      //     customPayload: null,
+      //     forwardTonAmount: ton("0.01"),
+      //     forwardPayload: emptySlice()
+      //     }.toCell()
+      // });
       }
     }
   } 
