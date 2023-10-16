@@ -71,8 +71,7 @@ contract Task3 with Deployable {
     if (sender() == self.owner) {
       if (msg.from == self.jettonAddressA) {
         self.aAmount = self.aAmount + msg.amount;
-      }
-      if (msg.from == self.jettonAddressB) {
+      } else {
         self.bAmount = self.bAmount + msg.amount;
       }
     }
@@ -91,7 +90,9 @@ contract Task3 with Deployable {
   
   get fun balance(jetton: Address): Int {
    require(((jetton == self.jettonAddressA) || (jetton == self.jettonAddressB)), "Unknown jetton");
-    if (jetton == self.jettonAddressA) { return self.aAmount; }
-    if (jetton == self.jettonAddressB) { return self.bAmount; }
+      if (jetton == self.jettonAddressA) { return self.aAmount; }
+      else { 
+          return self.bAmount; 
+      }
   }
 }
