@@ -66,30 +66,6 @@ contract Task3 with Deployable {
     self.decimal = 1000000000;
   }
 
-  receive(msg: TokenTransfer) {
-    send(SendParameters{
-      to: msg.destination,
-      value: msg.forwardTonAmount,
-      mode: SendRemainingValue + SendIgnoreErrors,
-      body: TokenNotification {
-        queryId: msg.queryId,
-        amount: price(msg.destination),
-        from: self.address,
-        forwardPayload: msg.forwardPayload
-      },
-      bounce: true
-    });
-  }
-
-  bounced(src: bounced<TokenTransfer>) {
-    self.reply(TokenNotification {
-        queryId: src.queryId,
-        amount: src.amount,
-        from: sender(),
-        forwardPayload: src.forwardPayload
-      });
-  }
-
   receive(msg: TokenNotification) {
     require(((msg.from == self.jettonAddressA) || (msg.from == self.jettonAddressB)), "Unknown jetton");
     if (sender() == self.owner) {
@@ -108,12 +84,12 @@ contract Task3 with Deployable {
     }
     
     if (jetton == self.jettonAddressB) {
-      return (self.aAmount * self.decimal / self.bAmount) * context().value / self.decimal;
+      return self.aAmount * self.decimal / self.bAmount;
     }
   }
   
   get fun balance(jetton: Address): Int {
-    if (jetton == self.jettonAddressA) { return aAmount; }
-    if (jetton == self.jettonAddressB) { return bAmount; }
+    if (jetton == self.jettonAddressA) { return self.aAmount; }
+    if (jetton == self.jettonAddressB) { return self.bAmount; }
   }
 }
