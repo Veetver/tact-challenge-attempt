@@ -76,14 +76,32 @@ contract Task3 with Deployable {
         self.bAmount = self.bAmount + msg.amount;
       }
     } else {
-      
-      send(SendParameters{
-        to: context().sender,
+       
+      let coinsToSend: Int = 0;
+      let isEnough: Bool = false;
+      let jettonReciever: Address = self.jettonAddressA;
+      if (context().sender == self.jettonAddressA) {
+        // amountOfBJettonToSend in A->B
+        coinsToSend = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
+        isEnough = self.bAmount >= coinsToSend;
+        jettonReciever = self.jettonAddressB;
+      } else {
+        // amountOfAJettonToSend in B->A
+        coinsToSend = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
+        isEnough = self.aAmount >= coinsToSend;
+        jettonReciever = self.jettonAddressA;
+      }
+
+      // Проверка наличия достаточного кол-ва монет 
+      if (isEnough) {
+        // Сконвертировать монеты
+        send(SendParameters{
+        to: jettonReciever,
         value: 0,
         mode: SendRemainingValue,
         body: TokenTransfer {
           queryId: 0,
-          amount: (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal, // should be amount of jettons to send
+          amount: coinsToSend, // should be amount of jettons to send
           destination: msg.from,
           responseDestination: myAddress(),
           customPayload: null,
@@ -91,6 +109,23 @@ contract Task3 with Deployable {
           forwardPayload: emptySlice()
           }.toCell()
       });
+      } else {
+        // Вернуть монеты владельцу
+        send(SendParameters{
+        to: context().sender,
+        value: 0,
+        mode: SendRemainingValue,
+        body: TokenTransfer {
+          queryId: 0,
+          amount: msg.amount, // should be amount of jettons to send
+          destination: msg.from,
+          responseDestination: myAddress(),
+          customPayload: null,
+          forwardTonAmount: ton("0.01"),
+          forwardPayload: emptySlice()
+          }.toCell()
+      });
+      }
     }
   } 
   
