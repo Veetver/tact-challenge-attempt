@@ -1,4 +1,4 @@
-rimport "@stdlib/deploy";
+import "@stdlib/deploy";
 
 /*
   TASK 3 - DEX
