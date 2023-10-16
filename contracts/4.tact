@@ -1,70 +1,150 @@
 import "@stdlib/deploy";
 
 /*
-  TASK 4 - NFT locker
-  Implement a smart contract that will lock NFT for a period of time specified by the owner.
-  Smart conrtact should contain logic to process following messages and getters: 
+  TASK 3 - DEX
+  Create a simple jetton dex contract that trades one pair of jettons: A and B.
+  The price of jettons depends on the amount of jettons that smart contract has.
+  Therefore, the smart contract needs to keep track of how much jettons it has.
+  
+  Price for the jetton A in swap B->A should be calculated by formula "amountOfJettonAOnContract * decimal / amountOfJettonBOnContract".
+  Token prices must be decimalized for accuracy, so it is the prices that must be adjusted to decimal 1e9.
+  Decimals are only needed for price accuracy. It should be set as 1e9.
+  So, if smart contract has 10 of jetton A and 2 of jetton B, then after sending 1 jetton B you should receive 5 of jettons A.
 
-  Messages: 
-  * OwnershipAssigned
-   - Recives nft + time (in a forwardPayload message as uint32) for which this nft will be locked + address of the sender of the nft (prevOwner).
-   - If the smart contract already holds an nft then return the incoming nft back to the sender
-  * NftWithdrawal
-   - Request withdrawal of the locked nft
-   - If sender is not the owner (that came from OwnershipAssigned as prevOwner address) then throw "Invalid sender" 
-   - If time has not passed then send message back to the sender with the comment "NFT is still locked" according to the TON's "message with text comment" standard 
-   - Otherwise (all good) send the locked nft back to the owner with all the remaining TON balance
-   Note that the order of checks is important
-   (in case: "sender is not the owner" and "time has not passed" at the same time, "Invalid sender" error takes priority)
+  Example formula for amountOfAJettonToSend in B->A swap will be
+  (amountOfJettonAOnContract * decimal / amountOfJettonBOnContract) * amountOfTokenBToSwap / decimal
 
-  Getters:
-  * time
-   - get how much lock time is left
-  * nft
-   - get the address of the locked nft 
-  * owner
-   - get the owner of the locked nft (that came from OwnershipAssigned as prevOwner)
+  If smart contract pool doesn't have enough jettons to trade,
+  then it should send incoming jettons back to the user. For a clearer explanation,
+  let's look at the example we described above (smart contract has 10 of jetton A and 2 of jetton B).
+  If user will send 3 jettons B, smart contract should reject the message (because contract does not have 3 * 5 = 15 jettons A)
+  and send 3 jettons B back to the user.
+
+  If smart contract receives a different jetton (neither A nor B) then throw an error.
+
+  Implement a getter that returns the number of jettons in the pool and
+  one more to get the price of jetton A or jetton B.
+  Getters' behavior with incorrect parameter (address other than that of jetton A or B)
+  is undefined (there are no such tests).
+  
+  Note:
+  Admin can add jettons A and B just by sending them to the smart contract (we need to add initial supply to the pool for it to be functional).
+  To be exact: any jettons (A or B) received from the admin are "added". Admin can't swap.
 */
 
-message(0x05138d91) OwnershipAssigned {
-    queryId: Int as uint64;
-    prevOwner: Address;
-    forwardPayload: Slice as remaining; 
+message(0x7362d09c) TokenNotification {
+    queryId: Int as uint64; // Бесполезное число
+    amount: Int as coins;  // Кол-во полученных жетонов
+    from: Address;         // Адрес пользователя отправившего жетоны
+    forwardPayload: Slice as remaining; // что-то
 }
 
-message(0x5fcc3d14) Transfer { 
-    queryId: Int as uint64;            
-    newOwner: Address; 
-    responseDestination: Address; 
-    customPayload: Cell?; 
-    forwardAmount: Int as coins; 
-    forwardPayload: Slice as remaining; 
+// To simplify the testing process and the specificity of the messages being sent, we decided to add clear default values in this transaction
+message(0xf8a7ea5) TokenTransfer {
+     queryId: Int as uint64; // should be 0
+     amount: Int as coins; // should be amount of jettons to send
+     destination: Address; // should be user address / TokenNotification.from
+     responseDestination: Address?; // should be myAddress()
+     customPayload: Cell?; // should be null
+     forwardTonAmount: Int as coins; // should be ton("0.01")
+     forwardPayload: Slice as remaining; // should be emptySlice()
 }
 
-message NftWithdrawal {
-  queryId: Int as uint64;
-  nftAddress: Address;
-}
+contract Task3 with Deployable {
+  owner: Address;
+  aAmount: Int;
+  bAmount: Int;
+  jettonAddressA: Address;
+  jettonAddressB: Address;
+  decimal: Int;
 
-contract Task4 with Deployable {
-  seed: Int as uint128;
+  init(admin: Address, newJettonAddressA: Address, newJettonAddressB: Address) {
+    self.owner = admin;
+    self.jettonAddressA = newJettonAddressA;
+    self.jettonAddressB = newJettonAddressB;
+    self.aAmount = 0;
+    self.bAmount = 0;
+    self.decimal = 1000000000;
+  }
+
+  receive(msg: TokenNotification) {
+    require((context().sender == self.jettonAddressA) || (context().sender == self.jettonAddressB), "unknown jetton");
+    if (msg.from == self.owner) {
+      if (context().sender == self.jettonAddressA) {
+        self.aAmount = self.aAmount + msg.amount;
+      } else {
+        self.bAmount = self.bAmount + msg.amount;
+      }
+    } else {
+      let coinsToSend: Int = 0;
+      let isEnough: Bool = false;
+      let jettonReciever: Address = self.jettonAddressA;
+      if (context().sender == self.jettonAddressA) {
+        // amountOfBJettonToSend in A->B
+        coinsToSend = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
+        isEnough = self.bAmount >= coinsToSend;
+        jettonReciever = self.jettonAddressA;
+      } else {
+        // amountOfAJettonToSend in B->A
+        coinsToSend = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
+        isEnough = self.aAmount >= coinsToSend;
+        jettonReciever = self.jettonAddressB;
+      }
+
+      // Проверка наличия достаточного кол-ва монет 
+      if (isEnough) {
+        // Сконвертировать монеты
+        send(SendParameters{
+        to: context().sender,
+        value: 0,
+        mode: SendRemainingValue,
+        body: TokenTransfer {
+          queryId: 0,
+          amount: coinsToSend, // should be amount of jettons to send
+          destination: msg.from,
+          responseDestination: myAddress(),
+          customPayload: null,
+          forwardTonAmount: ton("0.01"),
+          forwardPayload: emptySlice()
+          }.toCell()
+      });
+      } else {
+        // Вернуть монеты владельцу **Работает**
+        send(SendParameters{
+        to: context().sender,
+        value: 0,
+        mode: SendRemainingValue,
+        body: TokenTransfer {
+          queryId: 0,
+          amount: msg.amount,
+          destination: msg.from,
+          responseDestination: myAddress(),
+          customPayload: null,
+          forwardTonAmount: ton("0.01"),
+          forwardPayload: emptySlice()
+          }.toCell()
+      });
+      }
+    }
+  } 
   
-  init(seed: Int) {
-    self.seed = seed; // needed to deploy multiple smart contracts copies from one admin address
+  get fun price(jetton: Address): Int { 
+      if (jetton == self.jettonAddressA) {
+          return self.bAmount * self.decimal / self.aAmount;
+      }
+      if (jetton == self.jettonAddressB) {
+          return self.aAmount * self.decimal / self.bAmount;
+      }
+      return -1;
   }
-
-  receive(msg: OwnershipAssigned) {
-  }
-
-  receive(msg: NftWithdrawal) {
-  }
-
-  get fun time(): Int {
-  }
-
-  get fun nft(): Address? {
-  }
-
-  get fun owner(): Address? {
+  
+  get fun balance(jetton: Address): Int { 
+      if (jetton == self.jettonAddressA) {
+          return self.aAmount;
+      }
+      if (jetton == self.jettonAddressB) {
+          return self.bAmount;
+      }
+      return -1;
   }
 }
