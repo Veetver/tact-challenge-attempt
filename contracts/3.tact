@@ -81,12 +81,12 @@ contract Task3 with Deployable {
     });
   }
 
-  bounced(msg: TokenTransfer) {
+  bounced(src: bounced<TokenTransfer>) {
     self.reply(TokenNotification {
-        queryId: msg.queryId,
-        amount: msg.amount,
+        queryId: src.queryId,
+        amount: src.amount,
         from: sender(),
-        forwardPayload: msg.forwardPayload
+        forwardPayload: src.forwardPayload
       });
   }
 
