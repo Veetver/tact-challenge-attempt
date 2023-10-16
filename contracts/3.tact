@@ -16,7 +16,7 @@ message(0xf8a7ea5) TokenTransfer {
      forwardTonAmount: Int as coins; // should be ton("0.01")
      forwardPayload: Slice as remaining; // should be emptySlice()
 }
-const MIN_FUEL: Int = ton("0.01");
+
 contract Task3 with Deployable {
   owner: Address;
   aAmount: Int;
@@ -53,20 +53,19 @@ contract Task3 with Deployable {
         // amountOfBJettonToSend in A->B
         // How much coins B
         coinsToSend = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
-        isEnough = self.bAmount >= coinsToSend;
+        isEnough = coinsToSend <= self.bAmount;
         jettonReciever = self.jettonAddressB;
       } else {
         // amountOfAJettonToSend in B->A
         // How much coins A
         coinsToSend = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
-        isEnough = self.aAmount >= coinsToSend;
+        isEnough = coinsToSend <= self.aAmount;
         jettonReciever = self.jettonAddressA;
       }
 
 
       // Проверка наличия достаточного кол-ва монет 
       if (isEnough) {
-
         // Обновить значения Task3
         if (jettonReciever == self.jettonAddressA) {
           self.bAmount = self.bAmount - coinsToSend;
@@ -87,7 +86,7 @@ contract Task3 with Deployable {
           destination: msg.from,
           responseDestination: myAddress(),
           customPayload: null,
-          forwardTonAmount: MIN_FUEL,
+          forwardTonAmount: ton("0.01"),
           forwardPayload: emptySlice()
           }.toCell()
       });
@@ -104,7 +103,7 @@ contract Task3 with Deployable {
           destination: msg.from,
           responseDestination: myAddress(),
           customPayload: null,
-          forwardTonAmount: MIN_FUEL,
+          forwardTonAmount: ton("0.01"),
           forwardPayload: emptySlice()
           }.toCell()
       });
@@ -113,7 +112,7 @@ contract Task3 with Deployable {
   } 
   
   get fun price(jetton: Address): Int {
-    require((context().sender == self.jettonAddressA) || (context().sender == self.jettonAddressB), "unknown jetton");
+    require((sender() == self.jettonAddressA) || (sender() == self.jettonAddressB), "unknown jetton");
       if (jetton == self.jettonAddressA) {
           return self.bAmount * self.decimal / self.aAmount;
       } else {
@@ -122,7 +121,7 @@ contract Task3 with Deployable {
   }
   
   get fun balance(jetton: Address): Int { 
-    require((context().sender == self.jettonAddressA) || (context().sender == self.jettonAddressB), "unknown jetton");
+    require((sender() == self.jettonAddressA) || (sender() == self.jettonAddressB), "unknown jetton");
       if (jetton == self.jettonAddressA) {
           return self.aAmount;
       } else {
