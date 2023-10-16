@@ -66,6 +66,10 @@ contract Task3 with Deployable {
     self.decimal = 1000000000;
   }
 
+  receive() {
+
+  }
+
   receive(msg: TokenNotification) {
     require(((msg.from == self.jettonAddressA) || (msg.from == self.jettonAddressB)), "Unknown jetton");
     if (sender() == self.owner) {
