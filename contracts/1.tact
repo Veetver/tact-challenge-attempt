@@ -18,6 +18,10 @@ extends mutates fun subCounter(self: Int, c: Int) {
 contract Task1 with Deployable {
     counter: Int as int32 = 0;
 
+init() {
+
+}
+
     receive(msg: Add) {
       self.counter.addToCounter(msg.number);
     }    
