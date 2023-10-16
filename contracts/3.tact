@@ -81,18 +81,17 @@ contract Task3 with Deployable {
     require(((jetton == self.jettonAddressA) || (jetton == self.jettonAddressB)), "Unknown jetton");
     if (jetton == self.jettonAddressA) {
       return self.aAmount * self.decimal / self.bAmount;
-    }
-    
-    if (jetton == self.jettonAddressB) {
+    } else {
       return self.aAmount * self.decimal / self.bAmount;
     }
   }
   
   get fun balance(jetton: Address): Int {
    require(((jetton == self.jettonAddressA) || (jetton == self.jettonAddressB)), "Unknown jetton");
-      if (jetton == self.jettonAddressA) { return self.aAmount; }
-      else { 
-          return self.bAmount; 
+      if (jetton == self.jettonAddressA) {
+        return self.aAmount;
+      } else {
+        return self.bAmount; 
       }
   }
 }
