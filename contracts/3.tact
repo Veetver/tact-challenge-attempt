@@ -85,16 +85,16 @@ contract Task3 with Deployable {
         isEnough = self.bAmount >= coinsToSend;
 
         if (isEnough) {
-        self.aAmount = self.aAmount - msg.amount;
-        self.bAmount = self.bAmount + msg.amount;
+        self.aAmount = self.aAmount + msg.amount;
+        self.bAmount = self.bAmount - coinsToSend;
         }
       } else {
         // amountOfAJettonToSend in B->A
         coinsToSend = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
         isEnough = self.aAmount >= coinsToSend;
         if (isEnough) {
-        self.aAmount = self.aAmount + msg.amount;
-        self.bAmount = self.bAmount - msg.amount;
+        self.aAmount = self.aAmount - coinsToSend;
+        self.bAmount = self.bAmount + msg.amount;
         }
       }
 
