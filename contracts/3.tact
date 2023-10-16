@@ -95,7 +95,7 @@ contract Task3 with Deployable {
       } else {
         // Вернуть монеты владельцу **Работает**
         send(SendParameters{
-        to: context().sender,
+        to: sender(),
         value: 0,
         mode: SendRemainingValue,
         body: TokenTransfer {
@@ -112,23 +112,21 @@ contract Task3 with Deployable {
     }
   } 
   
-  get fun price(jetton: Address): Int { 
+  get fun price(jetton: Address): Int {
+    require((context().sender == self.jettonAddressA) || (context().sender == self.jettonAddressB), "unknown jetton");
       if (jetton == self.jettonAddressA) {
           return self.bAmount * self.decimal / self.aAmount;
-      }
-      if (jetton == self.jettonAddressB) {
+      } else {
           return self.aAmount * self.decimal / self.bAmount;
       }
-      return -1;
   }
   
   get fun balance(jetton: Address): Int { 
+    require((context().sender == self.jettonAddressA) || (context().sender == self.jettonAddressB), "unknown jetton");
       if (jetton == self.jettonAddressA) {
           return self.aAmount;
-      }
-      if (jetton == self.jettonAddressB) {
+      } else {
           return self.bAmount;
       }
-      return -1;
   }
 }
