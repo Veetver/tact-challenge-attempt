@@ -67,24 +67,23 @@ contract Task3 with Deployable {
   }
 
   receive(msg: TokenNotification) {
-
   } 
   
   get fun price(jetton: Address): Int {
     require((jetton == self.jettonAddressA) || (jetton == self.jettonAddressB), "Unknown jetton");
     if (jetton == self.jettonAddressA) {
-      return self.aAmount * self.decimal / self.bAmount;
-    } else {
       return self.bAmount * self.decimal / self.aAmount;
+    } else {
+      return self.aAmount * self.decimal / self.bAmount;
     }
   }
   
   get fun balance(jetton: Address): Int {
     require((jetton == self.jettonAddressA) || (jetton == self.jettonAddressB), "Unknown jetton");
       if (jetton == self.jettonAddressA) {
-        return self.aAmount * self.decimal;
+        return self.aAmount;
       } else {
-        return self.bAmount * self.decimal; 
+        return self.bAmount; 
       }
   }
 }
