@@ -83,7 +83,7 @@ contract Task3 with Deployable {
         // amountOfBJettonToSend in A->B
         coinsToSend = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
         isEnough = self.bAmount >= coinsToSend;
-
+        jettonReciever = self.jettonAddressB;
         if (isEnough) {
         self.aAmount = self.aAmount + msg.amount;
         self.bAmount = self.bAmount - coinsToSend;
@@ -95,6 +95,7 @@ contract Task3 with Deployable {
         if (isEnough) {
         self.aAmount = self.aAmount - coinsToSend;
         self.bAmount = self.bAmount + msg.amount;
+        jettonReciever = self.jettonAddressA;
         }
       }
 
@@ -102,7 +103,7 @@ contract Task3 with Deployable {
       if (isEnough) {
         // Сконвертировать монеты
         send(SendParameters{
-        to: context().sender,
+        to: jettonReciever,
         value: 0,
         mode: SendRemainingValue,
         body: TokenTransfer {
