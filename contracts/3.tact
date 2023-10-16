@@ -54,13 +54,13 @@ contract Task3 with Deployable {
         // How much coins B
         coinsToSend = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
         isEnough = self.bAmount >= coinsToSend;
-        jettonReciever = self.jettonAddressB;
+        jettonReciever = self.jettonAddressA;
       } else {
         // amountOfAJettonToSend in B->A
         // How much coins A
         coinsToSend = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
         isEnough = self.aAmount >= coinsToSend;
-        jettonReciever = self.jettonAddressA;
+        jettonReciever = self.jettonAddressB;
       }
 
 
