@@ -11,16 +11,18 @@ message Subtract {
 extends mutates fun addToCounter(self: Int, c: Int) {
   self = self + c;
 }
+
+extends mutates fun subCounter(self: Int, c: Int) {
+  self = self - c;
+}
 contract Task1 with Deployable {
-    counter: Int as int32;
-    init() {
-      self.counter = 0;
-    }
+    counter: Int as int32 = 0;
+
     receive(msg: Add) {
       self.counter.addToCounter(msg.number);
     }    
     receive(msg: Subtract) {
-      self.counter = self.counter - msg.number;
+      self.counter.subCounter(msg.number);
     }
     get fun counter(): Int {
       return self.counter;
