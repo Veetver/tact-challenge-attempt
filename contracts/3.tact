@@ -74,7 +74,7 @@ return 0;
   }
   
   get fun balance(jetton: Address): Int {
-    require((jetton == self.jettonAddressA) || (jetton == self.jettonAddressB), "Unknown jetton");
+    require((jetton == self.jettonAddressA) || (jetton == self.jettonAddressB), "unknown jetton");
       if (jetton == self.jettonAddressA) {
         return self.aAmount;
       } else {
