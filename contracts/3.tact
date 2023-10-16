@@ -67,14 +67,7 @@ contract Task3 with Deployable {
   }
 
   receive(msg: TokenNotification) {
-    require(((msg.from == self.jettonAddressA) || (msg.from == self.jettonAddressB)), "Unknown jetton");
-    if (sender() == self.owner) {
-      if (msg.from == self.jettonAddressA) {
-        self.aAmount = self.aAmount + msg.amount;
-      } else {
-        self.bAmount = self.bAmount + msg.amount;
-      }
-    }
+
   } 
   
   get fun price(jetton: Address): Int {
