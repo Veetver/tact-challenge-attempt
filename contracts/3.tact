@@ -68,6 +68,30 @@ contract Task3 with Deployable {
   }
 
   receive(msg: TokenNotification) {
+    require((context().sender == self.jettonAddressA) || (context().sender == self.jettonAddressB), "unknown jetton");
+    if (msg.from == self.owner) {
+      if (context().sender == self.jettonAddressA) {
+        self.aAmount = self.aAmount + msg.amount;
+      } else {
+        self.bAmount = self.bAmount + msg.amount;
+      }
+    } else {
+      
+      send(SendParameters{
+        to: context().sender,
+        value: 0,
+        mode: SendRemainingValue,
+        body: TokenTransfer {
+          queryId: 0,
+          amount: (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal, // should be amount of jettons to send
+          destination: msg.from,
+          responseDestination: myAddress(),
+          customPayload: null,
+          forwardTonAmount: ton("0.01"),
+          forwardPayload: emptySlice()
+          }.toCell()
+      });
+    }
   } 
   
   get fun price(jetton: Address): Int { 
