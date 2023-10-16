@@ -83,22 +83,26 @@ contract Task3 with Deployable {
         // amountOfBJettonToSend in A->B
         coinsToSend = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
         isEnough = self.bAmount >= coinsToSend;
-        jettonReciever = self.jettonAddressA;
+
+        if (isEnough) {
+        self.aAmount = self.aAmount - msg.amount;
+        self.bAmount = self.bAmount + msg.amount;
+        }
       } else {
         // amountOfAJettonToSend in B->A
         coinsToSend = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
         isEnough = self.aAmount >= coinsToSend;
-        jettonReciever = self.jettonAddressB;
+        if (isEnough) {
+        self.aAmount = self.aAmount + msg.amount;
+        self.bAmount = self.bAmount - msg.amount;
+        }
       }
-
-      dump(coinsToSend);
-      dump(isEnough);
 
       // Проверка наличия достаточного кол-ва монет 
       if (isEnough) {
         // Сконвертировать монеты
         send(SendParameters{
-        to: jettonReciever,
+        to: context().sender,
         value: 0,
         mode: SendRemainingValue,
         body: TokenTransfer {
