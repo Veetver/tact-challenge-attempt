@@ -34,32 +34,11 @@ contract Task3 with Deployable {
     self.decimal = 1000000000;
   }
 
-  fun onlyAnB(){
-        require((context().sender == self.jettonAddressA) || (context().sender == self.jettonAddressB), "unknown jetton");
-  }
-
-  fun convertJettonsAndSend(jettonAddress: Address, coinsToSend: Int, destination: Address) {
-        send(SendParameters{
-        to: jettonAddress,
-        value: 0,
-        mode: SendRemainingValue,
-        body: TokenTransfer {
-          queryId: 0,
-          amount: coinsToSend, // should be amount of jettons to send
-          destination: destination,
-          responseDestination: myAddress(),
-          customPayload: null,
-          forwardTonAmount: MIN_FUEL,
-          forwardPayload: emptySlice()
-          }.toCell()
-      });
-  }
-
   receive(msg: TokenNotification) {
-    self.onlyAnB();
+    require((context().sender == self.jettonAddressA) || (context().sender == self.jettonAddressB), "unknown jetton");
 
     if (msg.from == self.owner) {
-      if (context().sender == self.jettonAddressA) {
+      if (sender() == self.jettonAddressA) {
         self.aAmount = self.aAmount + msg.amount;
       } else {
         self.bAmount = self.bAmount + msg.amount;
@@ -68,22 +47,40 @@ contract Task3 with Deployable {
       let coinsToSend: Int = 0;
       let isEnough: Bool = false;
       let jettonReciever: Address = self.jettonAddressA;
-      if (context().sender == self.jettonAddressA) {
+
+
+      if (sender() == self.jettonAddressA) {
         // amountOfBJettonToSend in A->B
+        // How much coins B
         coinsToSend = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
         isEnough = self.bAmount >= coinsToSend;
         jettonReciever = self.jettonAddressB;
       } else {
         // amountOfAJettonToSend in B->A
+        // How much coins A
         coinsToSend = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
         isEnough = self.aAmount >= coinsToSend;
         jettonReciever = self.jettonAddressA;
       }
 
+
       // Проверка наличия достаточного кол-ва монет 
       if (isEnough) {
-        // Сконвертировать монеты
-        self.convertJettonsAndSend(jettonReciever, coinsToSend, msg.from);
+        // Сконвертировать и отправить монеты
+        send(SendParameters{
+        to: jettonReciever,
+        value: 0,
+        mode: SendRemainingValue,
+        body: TokenTransfer {
+          queryId: 0,
+          amount: coinsToSend,
+          destination: msg.from,
+          responseDestination: myAddress(),
+          customPayload: null,
+          forwardTonAmount: MIN_FUEL,
+          forwardPayload: emptySlice()
+          }.toCell()
+      });
         // Обновить значения Task3
         if (jettonReciever == self.jettonAddressA) {
           self.bAmount = self.bAmount - coinsToSend;
