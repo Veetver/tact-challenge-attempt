@@ -66,10 +66,6 @@ contract Task3 with Deployable {
     self.decimal = 1000000000;
   }
 
-  receive() {
-
-  }
-
   receive(msg: TokenNotification) {
     require(((msg.from == self.jettonAddressA) || (msg.from == self.jettonAddressB)), "Unknown jetton");
     if (sender() == self.owner) {
@@ -83,6 +79,7 @@ contract Task3 with Deployable {
   } 
   
   get fun price(jetton: Address): Int {
+    require(((jetton == self.jettonAddressA) || (jetton == self.jettonAddressB)), "Unknown jetton");
     if (jetton == self.jettonAddressA) {
       return self.aAmount * self.decimal / self.bAmount;
     }
@@ -93,8 +90,8 @@ contract Task3 with Deployable {
   }
   
   get fun balance(jetton: Address): Int {
+   require(((jetton == self.jettonAddressA) || (jetton == self.jettonAddressB)), "Unknown jetton");
     if (jetton == self.jettonAddressA) { return self.aAmount; }
     if (jetton == self.jettonAddressB) { return self.bAmount; }
-    return -1;
   }
 }
