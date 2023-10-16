@@ -54,18 +54,28 @@ contract Task3 with Deployable {
         // How much coins B
         coinsToSend = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
         isEnough = self.bAmount >= coinsToSend;
-        jettonReciever = self.jettonAddressA;
+        jettonReciever = self.jettonAddressB;
       } else {
         // amountOfAJettonToSend in B->A
         // How much coins A
         coinsToSend = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
         isEnough = self.aAmount >= coinsToSend;
-        jettonReciever = self.jettonAddressB;
+        jettonReciever = self.jettonAddressA;
       }
 
 
       // Проверка наличия достаточного кол-ва монет 
       if (isEnough) {
+
+        // Обновить значения Task3
+        if (jettonReciever == self.jettonAddressA) {
+          self.bAmount = self.bAmount - coinsToSend;
+          self.aAmount = self.aAmount + msg.amount;
+        } else {
+        self.aAmount = self.aAmount - coinsToSend;
+        self.bAmount = self.bAmount + msg.amount;
+        }
+
         // Сконвертировать и отправить монеты
         send(SendParameters{
         to: jettonReciever,
@@ -81,14 +91,6 @@ contract Task3 with Deployable {
           forwardPayload: emptySlice()
           }.toCell()
       });
-        // Обновить значения Task3
-        if (jettonReciever == self.jettonAddressA) {
-          self.bAmount = self.bAmount - coinsToSend;
-          self.aAmount = self.aAmount + msg.amount;
-        } else {
-        self.aAmount = self.aAmount - coinsToSend;
-        self.bAmount = self.bAmount + msg.amount;
-        }
 
       } else {
         // Вернуть монеты владельцу **Работает**
