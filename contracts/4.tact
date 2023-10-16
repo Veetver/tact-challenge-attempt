@@ -83,12 +83,16 @@ contract Task3 with Deployable {
         // amountOfBJettonToSend in A->B
         coinsToSend = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
         isEnough = self.bAmount >= coinsToSend;
-        jettonReciever = self.jettonAddressA;
+
+        self.aAmount = self.aAmount - msg.amount;
+        self.bAmount = self.bAmount + msg.amount;
       } else {
         // amountOfAJettonToSend in B->A
         coinsToSend = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
         isEnough = self.aAmount >= coinsToSend;
-        jettonReciever = self.jettonAddressB;
+        
+        self.aAmount = self.aAmount + msg.amount;
+        self.bAmount = self.bAmount - msg.amount;
       }
 
       // Проверка наличия достаточного кол-ва монет 
