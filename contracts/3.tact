@@ -94,10 +94,10 @@ contract Task3 with Deployable {
     require(((msg.from == self.jettonAddressA) || (msg.from == self.jettonAddressB)), "Unknown jetton");
     if (sender() == self.owner) {
       if (msg.from == self.jettonAddressA) {
-        self.aAmount = self.aAmount + msg.amount
+        self.aAmount = self.aAmount + msg.amount;
       }
       if (msg.from == self.jettonAddressB) {
-        self.bAmount = self.bAmount + msg.amount
+        self.bAmount = self.bAmount + msg.amount;
       }
     }
   } 
