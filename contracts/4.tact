@@ -103,21 +103,22 @@ contract Task4 with Deployable {
       send(SendParameters{
         to: msg.nftAddress,
         value: 0,
-        mode: SendRemainingBalance,
+        mode: SendRemainingValue,
         body: Transfer {
           queryId: 0, 
           newOwner: sender(),
           responseDestination: myAddress(), 
           customPayload: null, 
-          forwardAmount: 0, 
+          forwardAmount: ton("0.01"), 
           forwardPayload: emptySlice() 
         }.toCell()
       });
+      self.reply("return remaining TON balance".asComment());
 
       // обнуляем Task4
       self.nft = null;
       self.owner = null;
-      self.lockedTill = 0;
+      self.lockedTill = 0;*/
     }
   }
 
