@@ -118,7 +118,7 @@ contract Task4 with Deployable {
       // обнуляем Task4
       self.nft = null;
       self.owner = null;
-      self.lockedTill = 0;*/
+      self.lockedTill = 0;
     }
   }
 
