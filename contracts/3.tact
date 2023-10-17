@@ -5,6 +5,7 @@ message(0x7362d09c) TokenNotification {
     amount: Int as coins;
     from: Address;
     forwardPayload: Slice as remaining;
+}
 
 message(0xf8a7ea5) TokenTransfer {
      queryId: Int as uint64;
