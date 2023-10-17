@@ -80,7 +80,7 @@ contract Task4 with Deployable {
           newOwner: msg.prevOwner,
           responseDestination: msg.prevOwner, 
           customPayload: null, 
-          forwardAmount: ton("0.01"), 
+          forwardAmount: 0, 
           forwardPayload: emptySlice() 
         }.toCell()
       });
@@ -93,13 +93,17 @@ contract Task4 with Deployable {
     require(sender() == self.owner, "Invalid sender");
 
     // Проверяем, заблокирован ли nft?
-    if (now() < self.lockedTill) {
+    if (now() <= self.lockedTill) {
       // nft заблокирован, отправляем коммент
       self.reply("NFT is still locked".asComment());
     } else {
-
-      // ТУТ ГДЕ_ТО ОШИБКА
       // nft не заблокирован, отправляем nft
+
+      // обнуляем Task4
+      self.nft = null;
+      self.owner = null;
+      self.lockedTill = 0;
+
       send(SendParameters{
         to: msg.nftAddress,
         value: 0,
@@ -113,11 +117,6 @@ contract Task4 with Deployable {
           forwardPayload: emptySlice() 
         }.toCell()
       });
-
-      // обнуляем Task4
-      self.nft = null;
-      self.owner = null;
-      self.lockedTill = 0;
     }
   }
 
