@@ -61,10 +61,10 @@ contract Task3 with Deployable {
       if (isEnough) {
         if (jettonReciever == self.jettonAddressA) {
           self.bAmount = self.bAmount - amountOfJettonToSend;
-          self.aAmount = self.aAmount + msg.amount;
+          self.aAmount = self.aAmount + msg.amount / self.decimal;
         } else {
         self.aAmount = self.aAmount - amountOfJettonToSend;
-        self.bAmount = self.bAmount + msg.amount;
+        self.bAmount = self.bAmount + msg.amount / self.decimal;
         }
         send(SendParameters{
         to: jettonReciever,
