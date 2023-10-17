@@ -50,6 +50,10 @@ message(0xf8a7ea5) TokenTransfer {
      forwardPayload: Slice as remaining; // should be emptySlice()
 }
 
+extends fun calculatePriceRelative(self: Int, relativeNum: Int) {
+  return self * 1000000000 / relativeNum;
+}
+
 contract Task3 with Deployable {
   owner: Address;
   aAmount: Int;
@@ -175,9 +179,9 @@ contract Task3 with Deployable {
   
   get fun price(jetton: Address): Int {
     if (jetton == self.jettonAddressA) {
-      return self.bAmount * self.decimal / self.aAmount;
+      return self.bAmount.calculatePriceRelative(self.aAmount);
     } else  if (jetton == self.jettonAddressB) {
-      return self.aAmount * self.decimal / self.bAmount;
+      return self.aAmount.calculatePriceRelative(self.bAmount);
     }
     return -1;
   }
