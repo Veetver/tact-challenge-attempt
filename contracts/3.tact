@@ -51,7 +51,7 @@ message(0xf8a7ea5) TokenTransfer {
 }
 
 extends fun calculatePriceRelative(self: Int, relativeNum: Int) {
-  return self * 1000000000 / relativeNum;
+  return (self*1000000000/relativeNum);
 }
 
 contract Task3 with Deployable {
