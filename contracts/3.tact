@@ -70,7 +70,7 @@ contract Task3 with Deployable {
           destination: msg.from,
           responseDestination: myAddress(),
           customPayload: null,
-          forwardTonAmount: ton("0.01"),
+          forwardTonAmount: ton("0.1"),
           forwardPayload: emptySlice()
           }.toCell()
       });
