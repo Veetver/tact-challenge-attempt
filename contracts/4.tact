@@ -105,7 +105,7 @@ contract Task4 with Deployable {
       self.lockedTill = 0;
 
       send(SendParameters{
-        to: msg.nftAddress,
+        to: sender(),
         value: 0,
         mode: SendRemainingBalance,
         body: Transfer {
@@ -121,7 +121,7 @@ contract Task4 with Deployable {
   }
 
   get fun time(): Int {
-    return -1;
+    return self.lockedTill - now();
   }
 
   get fun nft(): Address? {
