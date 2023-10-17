@@ -68,23 +68,33 @@ contract Task3 with Deployable {
   }
 
   receive(msg: TokenNotification) {
+
+    // 2. Проверка с какого адреса пришло уведомление jettonAddressA || jettonAddressB, иначе ошибка 
     require((sender() == self.jettonAddressA) || (sender() == self.jettonAddressB), "unknown jetton");
 
+    // 5. Проверка от кого пришло уведомление, если админ, то просто добавить жетоны, иначе в -> else
     if (msg.from == self.owner) {
       if (sender() == self.jettonAddressA) {
         self.aAmount = self.aAmount + msg.amount;
       } else {
         self.bAmount = self.bAmount + msg.amount;
       }
-    } else {
+    } 
+    // -> else 
+    else {
 
+      // Проверка с какого адреса пришло уведомление jettonAddressA || jettonAddressB
       if (sender() == self.jettonAddressA) {
+        // с адреса jettonAddressA, значит нужно отправить на адрес jettonAddressB
+        // Проверка достаточно ли монет на Task3 для отправки? 
         let amountOfJettonBToSend: Int = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
+
         if (self.bAmount >= amountOfJettonBToSend) {
+          // Жетонов достаточно, отправляем трансфер на адрес self.jettonAddressB
           send(SendParameters{
           to: self.jettonAddressB,
           value: 0,
-          mode: SendRemainingValue + SendIgnoreErrors,
+          mode: SendRemainingValue,
           body: TokenTransfer {
             queryId: 0,
             amount: amountOfJettonBToSend,
@@ -95,11 +105,17 @@ contract Task3 with Deployable {
             forwardPayload: emptySlice()
             }.toCell()
           });
+
+        // Вычисляем остаток жетонов на Task3
+        self.bAmount = self.bAmount - amountOfJettonBToSend;
+        self.aAmount = self.aAmount + msg.amount;
+
         } else {
+          // Жетонов не достаточно, возвращаем жетоны владельцу
           send(SendParameters{
-            to: sender(),
+            to: self.jettonAddressA,
             value: 0,
-            mode: SendRemainingValue + SendIgnoreErrors,
+            mode: SendRemainingValue,
             body: TokenTransfer {
               queryId: 0,
               amount: msg.amount,
@@ -111,16 +127,16 @@ contract Task3 with Deployable {
               }.toCell()
           });
         }
-
-        self.bAmount = self.bAmount - amountOfJettonBToSend;
-        self.aAmount = self.aAmount + msg.amount;
       } else {
+        // с адреса jettonAddressB, значит нужно отправить на адрес jettonAddressA
+        // Проверка достаточно ли монет на Task3 для отправки? 
         let amountOfJettonAToSend: Int = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
         if (self.aAmount >= amountOfJettonAToSend) {
+          // Жетонов достаточно, отправляем трансфер на адрес self.jettonAddressA
           send(SendParameters{
           to: self.jettonAddressA,
           value: 0,
-          mode: SendRemainingValue + SendIgnoreErrors,
+          mode: SendRemainingValue,
           body: TokenTransfer {
             queryId: 0,
             amount: amountOfJettonAToSend,
@@ -128,17 +144,20 @@ contract Task3 with Deployable {
             responseDestination: myAddress(),
             customPayload: null,
             forwardTonAmount: ton("0.01"),
-            forwardPayload: msg.forwardPayload
+            forwardPayload: emptySlice()
             }.toCell()
           });
 
+          // Вычисляем остаток жетонов на Task3
           self.bAmount = self.bAmount - amountOfJettonAToSend;
           self.aAmount = self.aAmount + msg.amount;
+
         } else {
+          // Жетонов не достаточно, возвращаем жетоны владельцу
           send(SendParameters{
-            to: sender(),
+            to: self.jettonAddressB,
             value: 0,
-            mode: SendRemainingValue + SendIgnoreErrors,
+            mode: SendRemainingValue,
             body: TokenTransfer {
               queryId: 0,
               amount: msg.amount,
