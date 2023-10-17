@@ -63,7 +63,7 @@ contract Task3 with Deployable {
         send(SendParameters{
         to: jettonReciever,
         value: 0,
-        mode: endIgnoreErrors,
+        mode: SendIgnoreErrors,
         body: TokenTransfer {
           queryId: 0,
           amount: amountOfJettonToSend,
