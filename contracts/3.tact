@@ -50,14 +50,6 @@ message(0xf8a7ea5) TokenTransfer {
      forwardPayload: Slice as remaining; // should be emptySlice()
 }
 
-extends fun calculatePriceRelative(self: Int, relativeNum: Int): Int {
-  return self * 1000000000 / relativeNum;
-}
-
-extends fun calcJettonAmountToSend(self: Int, relativeNum: Int, amount: Int): Int {
-  return self.calculatePriceRelative(relativeNum) * amount / 1000000000;
-}
-
 contract Task3 with Deployable {
   owner: Address;
   aAmount: Int;
@@ -95,7 +87,7 @@ contract Task3 with Deployable {
       if (sender() == self.jettonAddressA) {
         // с адреса jettonAddressA, значит нужно отправить на адрес jettonAddressB
         // Проверка достаточно ли монет на Task3 для отправки? 
-        let amountOfJettonBToSend: Int = self.bAmount.calcJettonAmountToSend(self.aAmount, msg.amount);
+        let amountOfJettonBToSend: Int = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
 
         if (self.bAmount >= amountOfJettonBToSend) {
           // Жетонов достаточно, отправляем трансфер на адрес self.jettonAddressB
@@ -138,7 +130,7 @@ contract Task3 with Deployable {
       } else {
         // с адреса jettonAddressB, значит нужно отправить на адрес jettonAddressA
         // Проверка достаточно ли монет на Task3 для отправки? 
-        let amountOfJettonAToSend: Int = self.aAmount.calcJettonAmountToSend(self.bAmount, msg.amount);
+        let amountOfJettonAToSend: Int = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
         if (self.aAmount >= amountOfJettonAToSend) {
           // Жетонов достаточно, отправляем трансфер на адрес self.jettonAddressA
           send(SendParameters{
@@ -183,9 +175,10 @@ contract Task3 with Deployable {
   
   get fun price(jetton: Address): Int {
     if (jetton == self.jettonAddressA) {
-      return self.bAmount.calculatePriceRelative(self.aAmount);
-    } else  if (jetton == self.jettonAddressB) {
-      return self.aAmount.calculatePriceRelative(self.bAmount);
+      return self.bAmount * self.decimal / self.aAmount;
+    }
+    if (jetton == self.jettonAddressB) {
+      return self.aAmount * self.decimal / self.bAmount;
     }
     return -1;
   }
@@ -193,7 +186,8 @@ contract Task3 with Deployable {
   get fun balance(jetton: Address): Int { 
     if (jetton == self.jettonAddressA) {
       return self.aAmount;
-    } else if (jetton == self.jettonAddressB) {
+    }
+    if (jetton == self.jettonAddressB) {
       return self.bAmount;
     }
     return -1;
