@@ -179,9 +179,9 @@ contract Task3 with Deployable {
   
   get fun price(jetton: Address): Int {
     if (jetton == self.jettonAddressA) {
-      return self.bAmount.calculatePriceRelative(self.aAmount);
+      return bAmount.calculatePriceRelative(self.aAmount);
     } else  if (jetton == self.jettonAddressB) {
-      return self.aAmount.calculatePriceRelative(self.bAmount);
+      return aAmount.calculatePriceRelative(self.bAmount);
     }
     return -1;
   }
