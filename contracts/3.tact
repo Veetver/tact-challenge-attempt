@@ -149,8 +149,8 @@ contract Task3 with Deployable {
           });
 
           // Вычисляем остаток жетонов на Task3
-          self.bAmount = self.bAmount - amountOfJettonAToSend;
-          self.aAmount = self.aAmount + msg.amount;
+          self.bAmount = self.bAmount + msg.amount;
+          self.aAmount = self.aAmount - amountOfJettonAToSend;
 
         } else {
           // Жетонов не достаточно, возвращаем жетоны владельцу
