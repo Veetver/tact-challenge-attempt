@@ -61,7 +61,7 @@ contract Task4 with Deployable {
     if (self.nft == null) {
       self.nft = sender();
       self.owner = msg.prevOwner;
-      self.lockedTill = now() + msg.forwardPayload.loadInt(32);
+      self.lockedTill = now() + msg.forwardPayload.loadUint(32);
     } else {
       send(SendParameters{
         to: sender(),
