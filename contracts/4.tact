@@ -109,11 +109,10 @@ contract Task4 with Deployable {
           newOwner: sender(),
           responseDestination: myAddress(), 
           customPayload: null, 
-          forwardAmount: ton("0.01"), 
+          forwardAmount: myBalance() - context().value, 
           forwardPayload: emptySlice() 
         }.toCell()
       });
-      self.reply("return remaining TON balance".asComment());
 
       // обнуляем Task4
       self.nft = null;
