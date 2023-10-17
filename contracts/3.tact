@@ -54,6 +54,10 @@ extends fun calculatePriceRelative(self: Int, relativeNum: Int): Int {
   return self * 1000000000 / relativeNum;
 }
 
+extends fun calcJettonAmountToSend(self: Int, relativeNum: Int, amount: Int): Int {
+  return self.calculatePriceRelative(relativeNum) * amount / 1000000000;
+}
+
 contract Task3 with Deployable {
   owner: Address;
   aAmount: Int;
@@ -91,7 +95,7 @@ contract Task3 with Deployable {
       if (sender() == self.jettonAddressA) {
         // с адреса jettonAddressA, значит нужно отправить на адрес jettonAddressB
         // Проверка достаточно ли монет на Task3 для отправки? 
-        let amountOfJettonBToSend: Int = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
+        let amountOfJettonBToSend: Int = self.bAmount.calcJettonAmountToSend(self.aAmount, msg.amount);
 
         if (self.bAmount >= amountOfJettonBToSend) {
           // Жетонов достаточно, отправляем трансфер на адрес self.jettonAddressB
@@ -134,7 +138,7 @@ contract Task3 with Deployable {
       } else {
         // с адреса jettonAddressB, значит нужно отправить на адрес jettonAddressA
         // Проверка достаточно ли монет на Task3 для отправки? 
-        let amountOfJettonAToSend: Int = (self.aAmount * self.decimal / self.bAmount) * msg.amount / self.decimal;
+        let amountOfJettonAToSend: Int = self.aAmount.calcJettonAmountToSend(self.bAmount, msg.amount);
         if (self.aAmount >= amountOfJettonAToSend) {
           // Жетонов достаточно, отправляем трансфер на адрес self.jettonAddressA
           send(SendParameters{
