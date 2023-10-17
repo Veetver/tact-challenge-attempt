@@ -63,14 +63,14 @@ contract Task3 with Deployable {
         send(SendParameters{
         to: jettonReciever,
         value: 0,
-        mode: SendRemainingValue,
+        mode: endIgnoreErrors,
         body: TokenTransfer {
           queryId: 0,
           amount: amountOfJettonToSend,
           destination: msg.from,
           responseDestination: myAddress(),
           customPayload: null,
-          forwardTonAmount: ton("0.1"),
+          forwardTonAmount: ton("0.01"),
           forwardPayload: emptySlice()
           }.toCell()
       });
@@ -87,7 +87,7 @@ contract Task3 with Deployable {
         send(SendParameters{
         to: sender(),
         value: 0,
-        mode: SendRemainingValue,
+        mode: SendIgnoreErrors,
         body: TokenTransfer {
           queryId: 0,
           amount: msg.amount,
