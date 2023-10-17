@@ -91,7 +91,7 @@ contract Task4 with Deployable {
   receive(msg: NftWithdrawal) {
     // Проверяем, является ли sender() владельцем nft?
     require(sender() == self.owner, "Invalid sender");
-
+    require(self.nft == msg.nftAddress, "Invalid nft");
     // Проверяем, заблокирован ли nft?
     if (now() <= self.lockedTill) {
       // nft заблокирован, отправляем коммент
