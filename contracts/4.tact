@@ -48,8 +48,11 @@ message NftWithdrawal {
 
 contract Task4 with Deployable {
   seed: Int as uint128;
+  // Текущий владелец nft
   owner: Address? = null;
+  // Текущий nft
   nft: Address? = null;
+  // Заблокировано до
   lockedTill: Int = 0;
 
   
@@ -58,11 +61,16 @@ contract Task4 with Deployable {
   }
 
   receive(msg: OwnershipAssigned) {
+    // Проверяем есть ли в Task4 nft?
     if (self.nft == null) {
+      // nft нет, добавляем. Присваиваем nft
       self.nft = sender();
+      // Присваиваем владельца
       self.owner = msg.prevOwner;
+      // Заблокировано до
       self.lockedTill = now() + msg.forwardPayload.loadUint(32);
     } else {
+      // nft есть, нужно отправить обратно nft
       send(SendParameters{
         to: sender(),
         value: 0,
@@ -79,15 +87,20 @@ contract Task4 with Deployable {
     }
   }
 
+  // Вывод nft
   receive(msg: NftWithdrawal) {
+    // Проверяем, является ли sender() владельцем nft?
     require(sender() == self.owner, "Invalid sender");
 
+    // Проверяем, заблокирован ли nft?
     if (now() < self.lockedTill) {
+      // nft заблокирован, отправляем коммент
       self.reply("NFT is still locked".asComment());
     } else {
+      // nft не заблокирован, отправляем nft
       send(SendParameters{
         to: msg.nftAddress,
-        value: 0,
+        value: self.myBalance(),
         mode: SendRemainingValue,
         body: Transfer {
           queryId: 0, 
@@ -99,6 +112,7 @@ contract Task4 with Deployable {
         }.toCell()
       });
 
+      // обнуляем Task4
       self.nft = null;
       self.owner = null;
       self.lockedTill = 0;
