@@ -71,7 +71,7 @@ contract Task4 with Deployable {
       self.lockedTill = now() + msg.forwardPayload.loadUint(32);
     } else {
       // nft есть, нужно отправить обратно nft
-      send(SendParameters{
+      /*send(SendParameters{
         to: sender(),
         value: 0,
         mode: SendRemainingValue,
@@ -83,7 +83,7 @@ contract Task4 with Deployable {
           forwardAmount: 0, 
           forwardPayload: emptySlice() 
         }.toCell()
-      });
+      });*/
     }
   }
 
@@ -106,8 +106,8 @@ contract Task4 with Deployable {
 
       send(SendParameters{
         to: msg.nftAddress,
-        value: myBalance(),
-        mode: SendRemainingValue,
+        value: 0,
+        mode: SendRemainingBalance,
         body: Transfer {
           queryId: msg.queryId,
           newOwner: sender(),
