@@ -100,8 +100,8 @@ contract Task4 with Deployable {
       // nft не заблокирован, отправляем nft
       send(SendParameters{
         to: msg.nftAddress,
-        value: self.myBalance(),
-        mode: SendRemainingValue,
+        value: 0,
+        mode: SendRemainingBalance,
         body: Transfer {
           queryId: 0, 
           newOwner: sender(),
