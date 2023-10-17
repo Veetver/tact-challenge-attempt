@@ -76,9 +76,9 @@ contract Task4 with Deployable {
         value: 0,
         mode: SendRemainingValue,
         body: Transfer {
-          queryId: 0, 
+          queryId: msg.queryId, 
           newOwner: msg.prevOwner,
-          responseDestination: myAddress(), 
+          responseDestination: msg.prevOwner, 
           customPayload: null, 
           forwardAmount: ton("0.01"), 
           forwardPayload: emptySlice() 
@@ -97,17 +97,19 @@ contract Task4 with Deployable {
       // nft заблокирован, отправляем коммент
       self.reply("NFT is still locked".asComment());
     } else {
+
+      // ТУТ ГДЕ_ТО ОШИБКА
       // nft не заблокирован, отправляем nft
       send(SendParameters{
         to: msg.nftAddress,
         value: 0,
-        mode: SendRemainingValue,
+        mode: SendRemainingBalance,
         body: Transfer {
-          queryId: 0, 
+          queryId: msg.queryId,
           newOwner: sender(),
-          responseDestination: myAddress(), 
+          responseDestination: sender(), 
           customPayload: null, 
-          forwardAmount: myBalance() - context().value, 
+          forwardAmount: 0, 
           forwardPayload: emptySlice() 
         }.toCell()
       });
