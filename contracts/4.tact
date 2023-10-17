@@ -97,8 +97,6 @@ contract Task4 with Deployable {
       // nft заблокирован, отправляем коммент
       self.reply("NFT is still locked".asComment());
     } else {
-
-      // ТУТ ГДЕ_ТО ОШИБКА
       // nft не заблокирован, отправляем nft
       send(SendParameters{
         to: msg.nftAddress,
