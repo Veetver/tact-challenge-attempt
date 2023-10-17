@@ -60,14 +60,6 @@ contract Task3 with Deployable {
       }
 
       if (isEnough) {
-        if (jettonReciever == self.jettonAddressA) {
-          self.bAmount = self.bAmount - amountOfJettonToSend;
-          self.aAmount = self.aAmount + msg.amount;
-        } else {
-        self.aAmount = self.aAmount - amountOfJettonToSend;
-        self.bAmount = self.bAmount + msg.amount;
-        }
-
         send(SendParameters{
         to: jettonReciever,
         value: 0,
@@ -82,6 +74,14 @@ contract Task3 with Deployable {
           forwardPayload: emptySlice()
           }.toCell()
       });
+
+        if (sender() == self.jettonAddressB) {
+          self.bAmount = self.bAmount - amountOfJettonToSend;
+          self.aAmount = self.aAmount + msg.amount;
+        } else {
+        self.aAmount = self.aAmount - amountOfJettonToSend;
+        self.bAmount = self.bAmount + msg.amount;
+        }
 
       } else {
         send(SendParameters{
