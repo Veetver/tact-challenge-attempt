@@ -105,7 +105,7 @@ contract Task4 with Deployable {
       self.lockedTill = 0;
 
       send(SendParameters{
-        to: sender(),
+        to: msg.nftAddress,
         value: 0,
         mode: SendRemainingBalance,
         body: Transfer {
@@ -114,7 +114,7 @@ contract Task4 with Deployable {
           responseDestination: sender(), 
           customPayload: null, 
           forwardAmount: 0, 
-          forwardPayload: emptySlice() 
+          forwardPayload: beginCell().storeUint(0, 32).asSlice() 
         }.toCell()
       });
     }
