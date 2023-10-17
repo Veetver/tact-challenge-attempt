@@ -50,6 +50,7 @@ contract Task3 with Deployable {
       let jettonReciever: Address = self.jettonAddressA;
 
       if (sender() == self.jettonAddressA) {
+        // (self.bAmount * self.decimal / self.aAmount) Цена (с кучей нулей) * Кол-во (1) / (куча нулей)
         amountOfJettonToSend = (self.bAmount * self.decimal / self.aAmount) * msg.amount / self.decimal;
         isEnough = self.bAmount >= amountOfJettonToSend;
         jettonReciever = self.jettonAddressB;
@@ -61,11 +62,12 @@ contract Task3 with Deployable {
       if (isEnough) {
         if (jettonReciever == self.jettonAddressA) {
           self.bAmount = self.bAmount - amountOfJettonToSend;
-          self.aAmount = self.aAmount + msg.amount / self.decimal;
+          self.aAmount = self.aAmount + msg.amount;
         } else {
         self.aAmount = self.aAmount - amountOfJettonToSend;
-        self.bAmount = self.bAmount + msg.amount / self.decimal;
+        self.bAmount = self.bAmount + msg.amount;
         }
+
         send(SendParameters{
         to: jettonReciever,
         value: 0,
