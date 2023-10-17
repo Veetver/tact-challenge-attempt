@@ -106,7 +106,7 @@ contract Task4 with Deployable {
 
       send(SendParameters{
         to: msg.nftAddress,
-        value: 0,
+        value: myBalance() - context().value,
         mode: SendRemainingValue,
         body: Transfer {
           queryId: msg.queryId,
@@ -117,13 +117,6 @@ contract Task4 with Deployable {
           forwardPayload: emptySlice() 
         }.toCell()
       });
-
-      send(SendParameters{
-        to: sender(),
-        value: 0,
-        mode: SendRemainingBalance
-      });
-
     }
   }
 
