@@ -54,7 +54,7 @@ contract Task4 with Deployable {
   nft: Address? = null;
   // Заблокировано до
   lockedTill: Int = 0;
-  queryId: uint64 = 0;
+  queryId: Int as uint64 = 0;
   
   init(seed: Int) {
     self.seed = seed; // needed to deploy multiple smart contracts copies from one admin address
