@@ -48,6 +48,8 @@ message NftWithdrawal {
 
 contract Task4 with Deployable {
   seed: Int as uint128;
+  // Тест сохранения queryId
+  queryId: Int as uint64 = 0;
   // Текущий владелец nft
   owner: Address? = null;
   // Текущий nft
@@ -69,6 +71,7 @@ contract Task4 with Deployable {
       self.owner = msg.prevOwner;
       // Заблокировано до
       self.lockedTill = now() + msg.forwardPayload.loadUint(32);
+      self.queryId = msg.queryId;
     } else {
       // nft есть, нужно отправить обратно nft
       send(SendParameters{
@@ -104,19 +107,19 @@ contract Task4 with Deployable {
       self.owner = null;
       self.lockedTill = 0;
 
-      /*send(SendParameters{
+      send(SendParameters{
         to: msg.nftAddress,
         value: 0,
-        mode: SendRemainingBalance + SendDestroyIfZero,
+        mode: SendRemainingBalance,
         body: Transfer {
-          queryId: msg.queryId,
+          queryId: self.queryId,
           newOwner: sender(),
           responseDestination: sender(), 
           customPayload: null, 
           forwardAmount: 0, 
           forwardPayload: emptySlice() 
         }.toCell()
-      });*/
+      });
     }
   }
 
