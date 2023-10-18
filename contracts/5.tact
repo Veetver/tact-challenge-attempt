@@ -17,7 +17,7 @@ import "@stdlib/deploy";
    - SC should send all collected fees to admin except 0.1 TON (use AdminFetchProfit message as body)
      In other words: after each such operation, the contract's balance should be equal to 0.1 TON (which are reserved for storage) and the rest should be sent to the admin
   * AdminWithdrawalAllNFTs
-   - SC should check that incoming tx TON value is enough for NFT withdrawal. Specifically, at least: (1 + totalNfts * 0.08) TONs. Otherwise throw "Insufficent funds"
+   - SC should check that incoming tx TON value is enough for NFT withdrawal. Specifically, at least: (1 + nftCount * 0.08) TONs. Otherwise throw "Insufficent funds"
    - SC should check that sender is the admin, throw "Invalid sender" otherwise
    - If all checks pass, SC should send NFTs one by one to the admin 
    - SC should be able to withdraw all NFTs by a single message from admin
@@ -33,7 +33,7 @@ import "@stdlib/deploy";
   * profit
    - returns how much collected fees is available to withdraw for the admin (all fees minus 0.1 TON)
   * nfts
-   - returns dict of held NFTs with NFT indexes (sequential numbers from 0, 1, 2 ... and up to 'totalNfts-1') as keys and NFT address as values 
+   - returns dict of held NFTs with NFT indexes (sequential numbers from 0, 1, 2 ... and up to 'nftCount-1') as keys and NFT address as values 
      the order of NFTs in this dictionary doesn't matter
 */
 
@@ -64,16 +64,12 @@ message(0x5fcc3d14) Transfer {
     forwardPayload: Slice as remaining; 
 }
 
-extends mutates fun getNextId(self: Int): Int {
-  return self + 1;
-}
-
 contract Task5 with Deployable {
   const MIN_GAS: Int = ton("0.1");
   seed: Int as uint128;
   owner: Address;
   nftMap: map<Int as uint16, Address>;
-  totalNfts: Int as uint16 = 0;
+  nftCount: Int as uint16 = 0;
   
   init(seed: Int, owner: Address) {
     self.owner = owner;
@@ -82,19 +78,21 @@ contract Task5 with Deployable {
 
   receive(msg: OwnershipAssigned) {
     if (msg.prevOwner == self.owner) {
-      self.nftMap.set(self.totalNfts, sender());
-      self.totalNfts.getNextId();
+      self.nftMap.set(self.nftCount, sender());
+      self.nftCount = self.nftCount + 1;
     } else {
-      // Проверка msg`s TON > 2.1 ton
+      // Проверка msg`s TON >= 2.1 ton
       if (context().value >= ton("2.1")) {
         nativeReserve(ton("2"), 0);
         // тут добавляем nft и возвращаем случайный
-        let nftId: Int = random(0, self.totalNfts); // 0-10, 10 - новый, выпало 10, нужно вернуть sender()
+        let nftId: Int = random(0, self.nftCount); // Всего 10 нфт, рандом из 0-9, 10 - новый, выпало 10, нужно вернуть sender()
         let returnNft: Address = sender();  // возвращаемая nft
-        if (self.totalNfts > nftId) { // 0 < 10
+
+        if (self.nftCount > nftId) { // 10 > (10),9,8..0
           returnNft = self.nftMap.get(nftId)!!; // получаем нфт из мапы с random id
           self.nftMap.set(nftId, sender()); // сеттим приходящий нфт с randomid
         }
+        
         send(SendParameters{
           to: returnNft,
           value: 0,
@@ -128,11 +126,11 @@ contract Task5 with Deployable {
   }
 
   receive(msg: AdminWithdrawalProfit) {
-    require(sender() == self.owner, "Insufficient privelegies");
+    require(sender() == self.owner, "Insufficient privileges");
     send(SendParameters{
       to: sender(),
       bounce: true,
-      value: myBalance() - context().value - self.MIN_GAS,
+      value: myBalance() - self.MIN_GAS,
       mode: SendRemainingValue,
       body: AdminFetchProfit{
         queryId: msg.queryId
@@ -142,10 +140,10 @@ contract Task5 with Deployable {
 
   receive(msg: AdminWithdrawalAllNFTs) {
     require(sender() == self.owner, "Invalid sender");
-    require(context().value >= (1 + self.totalNfts * 8 * 10000000), "Insufficent funds");
+    require(context().value >= (1 + self.nftCount * ton("0.08")), "Insufficent funds");
 
     let i: Int = 0;
-    repeat(self.totalNfts) {
+    repeat(self.nftCount) {
       send(SendParameters{
         to: self.nftMap.get(i)!!,
         value: 0,
@@ -162,7 +160,7 @@ contract Task5 with Deployable {
       i = i + 1;
     }
     self.nftMap = emptyMap();
-    self.totalNfts = 0;
+    self.nftCount = 0;
   }
 
   get fun profit(): Int { 
