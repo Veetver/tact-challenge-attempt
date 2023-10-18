@@ -95,14 +95,14 @@ contract Task4 with Deployable {
     // Проверяем, заблокирован ли nft?
     if (now() <= self.lockedTill) {
       // nft заблокирован, отправляем коммент
-      //self.reply("NFT is still locked".asComment());
+      self.reply("NFT is still locked".asComment());
     } else {
       // nft не заблокирован, отправляем nft
 
       // обнуляем Task4
-      self.nft = null;
-      self.owner = null;
-      self.lockedTill = 0;
+      // self.nft = null;
+      // self.owner = null;
+      // self.lockedTill = 0;
 
       send(SendParameters{
         to: msg.nftAddress,
