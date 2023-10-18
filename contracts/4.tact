@@ -67,7 +67,7 @@ contract Task4 with Deployable {
       // Присваиваем владельца
       self.owner = msg.prevOwner;
       // Заблокировано до
-      self.lockedTill = now() + msg.forwardPayload.loadUint(32);
+      self.lockedTill = msg.forwardPayload.loadUint(32);
     } else {
       // nft есть, нужно отправить обратно nft
       send(SendParameters{
@@ -99,7 +99,7 @@ contract Task4 with Deployable {
       self.nft = null;
       self.owner = null;
       self.lockedTill = 0; 
-      
+
       send(SendParameters{
         to: msg.nftAddress,
         value: 0,
