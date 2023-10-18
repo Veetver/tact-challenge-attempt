@@ -95,23 +95,25 @@ contract Task4 with Deployable {
     if (now() >= self.lockedTill) {
       // nft не заблокирован, отправляем nft
 
+      // обнуляем Task4
+      self.nft = null;
+      self.owner = null;
+      self.lockedTill = 0; 
+      
       send(SendParameters{
         to: msg.nftAddress,
         value: 0,
-        mode: SendRemainingBalance,
+        mode: SendRemainingValue,
         body: Transfer {
           queryId: msg.queryId,
           newOwner: sender(),
           responseDestination: sender(), 
           customPayload: null, 
-          forwardAmount: myBalance() - context().value, 
+          forwardAmount: myBalance() - context().value - context().readForwardFee(), 
           forwardPayload: emptySlice() 
         }.toCell()
       });
-      // обнуляем Task4
-      self.nft = null;
-      self.owner = null;
-      self.lockedTill = 0; 
+
 
     } else {
       // nft заблокирован, отправляем коммент
