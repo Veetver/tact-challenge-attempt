@@ -82,14 +82,16 @@ contract Task5 with Deployable {
 
   receive(msg: OwnershipAssigned) {
     if (msg.prevOwner == self.owner) {
-      self.nfts.set(self.totalNftsHeld.getNextId(), sender());
+      self.nfts.set(self.totalNftsHeld, sender());
+      self.totalNftsHeld.getNextId();
     } else {
       // Проверка msg`s TON > 2.1 ton
       if (context().value < ton("2.1")) {
         // тут добавляем nft и возвращаем случайный
         let nftId: Int = random(0, self.totalNftsHeld + 1);
         if (nftId > self.totalNftsHeld) {
-          self.nfts.set(self.totalNftsHeld.getNextId(), sender());
+          self.nfts.set(self.totalNftsHeld, sender());
+          self.totalNftsHeld.getNextId();
           nftId = self.totalNftsHeld;
         }
           self.nfts.set(nftId, sender());
