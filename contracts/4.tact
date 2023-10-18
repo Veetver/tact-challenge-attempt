@@ -54,7 +54,6 @@ contract Task4 with Deployable {
   nft: Address? = null;
   // Заблокировано до
   lockedTill: Int = 0;
-  queryId: Int as uint64 = 0;
   
   init(seed: Int) {
     self.seed = seed; // needed to deploy multiple smart contracts copies from one admin address
@@ -69,7 +68,6 @@ contract Task4 with Deployable {
       self.owner = msg.prevOwner;
       // Заблокировано до
       self.lockedTill = now() + msg.forwardPayload.loadUint(32);
-      self.queryId = msg.queryId;
     } else {
       // nft есть, нужно отправить обратно nft
       send(SendParameters{
@@ -100,28 +98,20 @@ contract Task4 with Deployable {
       send(SendParameters{
         to: msg.nftAddress,
         value: 0,
-        mode: SendRemainingValue,
+        mode: SendRemainingBalance,
         body: Transfer {
-          queryId: self.queryId,
+          queryId: msg.queryId,
           newOwner: sender(),
           responseDestination: sender(), 
           customPayload: null, 
-          forwardAmount: 0, 
+          forwardAmount: ton("0.01"), 
           forwardPayload: emptySlice() 
         }.toCell()
-    });
-
-    // обнуляем Task4
-    self.queryId = 0;
-    self.nft = null;
-    self.owner = null;
-    self.lockedTill = 0;
-
-      send(SendParameters{
-        to: sender(),
-        value: 0,
-        mode: SendRemainingBalance
-    });
+      });
+      // обнуляем Task4
+      self.nft = null;
+      self.owner = null;
+      self.lockedTill = 0; 
 
     } else {
       // nft заблокирован, отправляем коммент
