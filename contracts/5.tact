@@ -107,7 +107,8 @@ contract Task5 with Deployable {
           }.toCell()
         });
       } else {
-        let amount: Int = context().value - context().readForwardFee();
+        // Тест коммент 1
+        /*let amount: Int = context().value - context().readForwardFee();
         require(amount > 0, "Insufficient balance");
         send(SendParameters{
             to: sender(),
@@ -122,7 +123,7 @@ contract Task5 with Deployable {
               forwardAmount: 0, 
               forwardPayload: emptySlice() 
               }.toCell()
-        });
+        });*/
       }
     }
   }
