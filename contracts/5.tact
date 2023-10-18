@@ -87,6 +87,7 @@ contract Task5 with Deployable {
     } else {
       // Проверка msg`s TON > 2.1 ton
       if (context().value >= ton("2.1")) {
+        nativeReserve(ton("2"), 0);
         // тут добавляем nft и возвращаем случайный
         let nftId: Int = random(0, self.totalNfts); // 0-10, 10 - новый, выпало 10, нужно вернуть sender()
         let returnNft: Address = sender();  // возвращаемая nft
@@ -96,7 +97,7 @@ contract Task5 with Deployable {
         }
         send(SendParameters{
           to: returnNft,
-          value: context().value - context().readForwardFee() - ton("2"),
+          value: 0,
           mode: SendRemainingValue,
           body: Transfer {
             queryId: msg.queryId,
@@ -107,13 +108,11 @@ contract Task5 with Deployable {
             forwardPayload: emptySlice() 
           }.toCell()
         });
-      } else { // Мало! >=2.1, проверить хватит ли на отправку nft обратно?
-        let amount: Int = context().value - context().readForwardFee();
-        require(amount > 0, "Insufficient balance");
+      } else {
         send(SendParameters{
-            to: msg.prevOwner,
+            to: sender(),
             bounce: true,
-            value: amount,
+            value: 0,
             mode: SendRemainingValue,
             body: Transfer {
               queryId: msg.queryId, 
