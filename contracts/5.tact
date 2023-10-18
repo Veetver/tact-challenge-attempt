@@ -12,28 +12,28 @@ import "@stdlib/deploy";
 
   In details, the smart contract (later: SC) should have this logic:
   Messages
-  * AdminWithdrawalProfit 
-   - SC should check that sender is the admin / otherwise throw "Insufficient privelegies"
-   - SC should send all collected fees to admin except 0.1 TON (use AdminFetchProfit message as body)
-     In other words: after each such operation, the contract's balance should be equal to 0.1 TON (which are reserved for storage) and the rest should be sent to the admin
++ * AdminWithdrawalProfit 
++  - SC should check that sender is the admin / otherwise throw "Insufficient privelegies"
++  - SC should send all collected fees to admin except 0.1 TON (use AdminFetchProfit message as body)
++    In other words: after each such operation, the contract's balance should be equal to 0.1 TON (which are reserved for storage) and the rest should be sent to the admin
   * AdminWithdrawalAllNFTs
-   - SC should check that incoming tx TON value is enough for NFT withdrawal. Specifically, at least: (1 + totalNftsHeld * 0.08) TONs. Otherwise throw "Insufficent funds"
-   - SC should check that sender is the admin, throw "Invalid sender" otherwise
-   - If all checks pass, SC should send NFTs one by one to the admin 
-   - SC should be able to withdraw all NFTs by a single message from admin
++  - SC should check that incoming tx TON value is enough for NFT withdrawal. Specifically, at least: (1 + totalNftsHeld * 0.08) TONs. Otherwise throw "Insufficent funds"
++  - SC should check that sender is the admin, throw "Invalid sender" otherwise
++  - If all checks pass, SC should send NFTs one by one to the admin 
++  - SC should be able to withdraw all NFTs by a single message from admin
   * OwnershipAssigned 
-   - if prevOwner is the owner's (admin) address, then add NFT to the collection
-   - if value of TON attached is less then 2.1 TON then stop execution and return NFT back,
-     but only in case that TON attached is enough to process refund without losing TONs on the SC's balance
-   - randomly select NFT to send from all the NFTs that smart contract has
-   - send the selected NFT to the sender with all remaining balance (except for admin profit = fees collected from this and other swaps)
++  - if prevOwner is the owner's (admin) address, then add NFT to the collection
++  - if value of TON attached is less then 2.1 TON then stop execution and return NFT back,
++     but only in case that TON attached is enough to process refund without losing TONs on the SC's balance
++  - randomly select NFT to send from all the NFTs that smart contract has
++? - send the selected NFT to the sender with all remaining balance (except for admin profit = fees collected from this and other swaps)
      In other words: the contract's balance should increase by exactly 2 TON, some incoming TONs will be consumed for gas and the remainings of the incoming TONs should be refunded to the sender
   
   Getters
   * profit
-   - returns how much collected fees is available to withdraw for the admin (all fees minus 0.1 TON)
++  - returns how much collected fees is available to withdraw for the admin (all fees minus 0.1 TON)
   * nfts
-   - returns dict of held NFTs with NFT indexes (sequential numbers from 0, 1, 2 ... and up to 'totalNftsHeld-1') as keys and NFT address as values 
+?  - returns dict of held NFTs with NFT indexes (sequential numbers from 0, 1, 2 ... and up to 'totalNftsHeld-1') as keys and NFT address as values 
      the order of NFTs in this dictionary doesn't matter
 */
 
@@ -64,9 +64,16 @@ message(0x5fcc3d14) Transfer {
     forwardPayload: Slice as remaining; 
 }
 
+extends mutates fun getNextId(self: Int): Int {
+  return self + 1;
+}
+
 contract Task5 with Deployable {
+  const MIN_GAS: Int = ton("0.1");
   seed: Int as uint128;
   owner: Address;
+  nfts: map<Int as uint16, Address>;
+  totalNftsHeld: Int as uint16 = 0;
   
   init(seed: Int, owner: Address) {
     self.owner = owner;
@@ -74,17 +81,96 @@ contract Task5 with Deployable {
   }
 
   receive(msg: OwnershipAssigned) {
+    if (msg.prevOwner == self.owner) {
+      self.nfts.set(self.totalNftsHeld.getNextId(), sender());
+    } else {
+      // Проверка msg`s TON > 2.1 ton
+      if (context().value < ton("2.1")) {
+        // тут добавляем nft и возвращаем случайный
+        let nftId: Int = random(0, self.totalNftsHeld + 1);
+        if (nftId > self.totalNftsHeld) {
+          self.nfts.set(self.totalNftsHeld.getNextId(), sender());
+          nftId = self.totalNftsHeld;
+        }
+          self.nfts.set(nftId, sender());
+          let randomNft: Address = self.nfts.get(nftId)!!;
+        send(SendParameters{
+          to: randomNft,
+          value: context().value - context().readForwardFee() - ton("2"),
+          mode: SendRemainingValue,
+          body: Transfer {
+            queryId: msg.queryId,
+            newOwner: msg.prevOwner,
+            responseDestination: msg.prevOwner, 
+            customPayload: null, 
+            forwardAmount: 0, 
+            forwardPayload: emptySlice() 
+          }.toCell()
+        });
+      } else { // Мало! >=2.1, проверить хватит ли на отправку nft обратно?
+        let amount: Int = context().value - context().readForwardFee();
+        require(amount > 0, "Insufficient balance");
+        send(SendParameters{
+            to: msg.prevOwner,
+            bounce: true,
+            value: amount,
+            mode: SendRemainingValue,
+            body: Transfer {
+              queryId: msg.queryId, 
+              newOwner: msg.prevOwner,
+              responseDestination: msg.prevOwner, 
+              customPayload: null, 
+              forwardAmount: 0, 
+              forwardPayload: emptySlice() 
+              }.toCell()
+        });
+      }
+    }
   }
 
   receive(msg: AdminWithdrawalProfit) {
+    require(sender() == self.owner, "Insufficient privelegies");
+    send(SendParameters{
+      to: sender(),
+      bounce: true,
+      value: myBalance() - context().value - self.MIN_GAS,
+      mode: SendRemainingValue,
+      body: AdminFetchProfit{
+        queryId: msg.queryId
+      }.toCell()
+    });
   }
 
   receive(msg: AdminWithdrawalAllNFTs) {
+    require(sender() == self.owner, "Invalid sender");
+    require(context().value >= (1 + self.totalNftsHeld * 8 * 10000000), "Insufficent funds");
+
+    let i: Int = 0;
+    repeat(self.totalNftsHeld) {
+      send(SendParameters{
+        to: self.nfts.get(i)!!,
+        value: 0,
+        mode: SendRemainingValue,
+        body: Transfer {
+          queryId: msg.queryId,
+          newOwner: sender(),
+          responseDestination: sender(), 
+          customPayload: null, 
+          forwardAmount: 0, 
+          forwardPayload: emptySlice() 
+          }.toCell()
+      });
+      i = i + 1;
+    }
+    self.nfts = emptyMap();
+    self.totalNftsHeld = 0;
   }
 
   get fun profit(): Int { 
+    return myBalance() - self.MIN_GAS;
   }
   
-  get fun nfts(): map<Int as uint16, Address> { 
+  get fun nfts(): map<Int as uint16, Address> {
+    return self.nfts;
   }
 }
