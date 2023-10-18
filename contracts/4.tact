@@ -57,12 +57,10 @@ contract Task4 with Deployable {
     if (now() > self.lockedTill) {
       self.nft = null;
       self.owner = null;
-      self.lockedTill = 0; 
-
       send(SendParameters{
         to: msg.nftAddress,
         value: 0,
-        mode: SendRemainingValue,
+        mode: SendRemainingBalance,
         bounce: true,
         body: Transfer {
           queryId: msg.queryId,
@@ -74,12 +72,7 @@ contract Task4 with Deployable {
         }.toCell()
       });
     } else {
-      send(SendParameters{
-        to: sender(),
-        value: 0,
-        mode: SendRemainingValue,
-        body: "NFT is still locked".asComment()
-      });
+      self.reply("NFT is still locked".asComment());
     }
   }
 
