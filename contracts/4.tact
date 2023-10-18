@@ -106,8 +106,8 @@ contract Task4 with Deployable {
 
       send(SendParameters{
         to: msg.nftAddress,
-        value: myBalance() - context().readForwardFee(),
-        mode: SendRemainingValue,
+        value: 0,
+        mode: SendRemainingBalance + SendIgnoreErrors,
         body: Transfer {
           queryId: msg.queryId,
           newOwner: sender(),
