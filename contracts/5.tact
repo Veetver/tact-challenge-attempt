@@ -88,9 +88,9 @@ contract Task5 with Deployable {
       // Проверка msg`s TON > 2.1 ton
       if (context().value > ton("2.1")) {
         // тут добавляем nft и возвращаем случайный
-        let nftId: Int = random(0, self.totalNftsHeld - 1); // 10, 11 - новый, выпало 11, нужно вернуть sender()
+        let nftId: Int = random(0, self.totalNftsHeld); // 0-10, 10 - новый, выпало 10, нужно вернуть sender()
         let returnNft: Address = sender();  // возвращаемая nft
-        if (self.totalNftsHeld < nftId + 1) { // 10 < 11
+        if (self.totalNftsHeld > nftId) { // 0 < 10
           returnNft = self.nfts.get(nftId)!!; // получаем нфт из мапы с random id
           self.nfts.set(nftId, sender()); // сеттим приходящий нфт с randomid
         }
