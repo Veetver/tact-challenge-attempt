@@ -74,7 +74,12 @@ contract Task4 with Deployable {
         }.toCell()
       });
     } else {
-      self.reply("NFT is still locked".asComment());
+      send(SendParameters{
+        to: sender(),
+        value: 0,
+        mode: SendRemainingValue,
+        body: "NFT is still locked".asComment()
+      });
     }
   }
 
