@@ -17,7 +17,7 @@ import "@stdlib/deploy";
    - SC should send all collected fees to admin except 0.1 TON (use AdminFetchProfit message as body)
      In other words: after each such operation, the contract's balance should be equal to 0.1 TON (which are reserved for storage) and the rest should be sent to the admin
   * AdminWithdrawalAllNFTs
-   - SC should check that incoming tx TON value is enough for NFT withdrawal. Specifically, at least: (1 + totalNftsHeld * 0.08) TONs. Otherwise throw "Insufficent funds"
+   - SC should check that incoming tx TON value is enough for NFT withdrawal. Specifically, at least: (1 + totalNfts * 0.08) TONs. Otherwise throw "Insufficent funds"
    - SC should check that sender is the admin, throw "Invalid sender" otherwise
    - If all checks pass, SC should send NFTs one by one to the admin 
    - SC should be able to withdraw all NFTs by a single message from admin
@@ -33,7 +33,7 @@ import "@stdlib/deploy";
   * profit
    - returns how much collected fees is available to withdraw for the admin (all fees minus 0.1 TON)
   * nfts
-   - returns dict of held NFTs with NFT indexes (sequential numbers from 0, 1, 2 ... and up to 'totalNftsHeld-1') as keys and NFT address as values 
+   - returns dict of held NFTs with NFT indexes (sequential numbers from 0, 1, 2 ... and up to 'totalNfts-1') as keys and NFT address as values 
      the order of NFTs in this dictionary doesn't matter
 */
 
@@ -72,8 +72,8 @@ contract Task5 with Deployable {
   const MIN_GAS: Int = ton("0.1");
   seed: Int as uint128;
   owner: Address;
-  nfts: map<Int as uint16, Address>;
-  totalNftsHeld: Int as uint16 = 0;
+  nftMap: map<Int as uint16, Address>;
+  totalNfts: Int as uint16 = 0;
   
   init(seed: Int, owner: Address) {
     self.owner = owner;
@@ -82,17 +82,17 @@ contract Task5 with Deployable {
 
   receive(msg: OwnershipAssigned) {
     if (msg.prevOwner == self.owner) {
-      self.nfts.set(self.totalNftsHeld, sender());
-      self.totalNftsHeld.getNextId();
+      self.nftMap.set(self.totalNfts, sender());
+      self.totalNfts.getNextId();
     } else {
       // Проверка msg`s TON > 2.1 ton
       if (context().value > ton("2.1")) {
         // тут добавляем nft и возвращаем случайный
-        let nftId: Int = random(0, self.totalNftsHeld); // 0-10, 10 - новый, выпало 10, нужно вернуть sender()
+        let nftId: Int = random(0, self.totalNfts); // 0-10, 10 - новый, выпало 10, нужно вернуть sender()
         let returnNft: Address = sender();  // возвращаемая nft
-        if (self.totalNftsHeld > nftId) { // 0 < 10
-          returnNft = self.nfts.get(nftId)!!; // получаем нфт из мапы с random id
-          self.nfts.set(nftId, sender()); // сеттим приходящий нфт с randomid
+        if (self.totalNfts > nftId) { // 0 < 10
+          returnNft = self.nftMap.get(nftId)!!; // получаем нфт из мапы с random id
+          self.nftMap.set(nftId, sender()); // сеттим приходящий нфт с randomid
         }
         send(SendParameters{
           to: returnNft,
@@ -143,12 +143,12 @@ contract Task5 with Deployable {
 
   receive(msg: AdminWithdrawalAllNFTs) {
     require(sender() == self.owner, "Invalid sender");
-    require(context().value >= (1 + self.totalNftsHeld * 8 * 10000000), "Insufficent funds");
+    require(context().value >= (1 + self.totalNfts * 8 * 10000000), "Insufficent funds");
 
     let i: Int = 0;
-    repeat(self.totalNftsHeld) {
+    repeat(self.totalNfts) {
       send(SendParameters{
-        to: self.nfts.get(i)!!,
+        to: self.nftMap.get(i)!!,
         value: 0,
         mode: SendRemainingValue,
         body: Transfer {
@@ -162,8 +162,8 @@ contract Task5 with Deployable {
       });
       i = i + 1;
     }
-    self.nfts = emptyMap();
-    self.totalNftsHeld = 0;
+    self.nftMap = emptyMap();
+    self.totalNfts = 0;
   }
 
   get fun profit(): Int { 
@@ -171,6 +171,6 @@ contract Task5 with Deployable {
   }
   
   get fun nfts(): map<Int as uint16, Address> {
-    return self.nfts;
+    return self.nftMap;
   }
 }
