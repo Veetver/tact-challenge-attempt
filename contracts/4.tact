@@ -57,7 +57,7 @@ contract Task4 with Deployable {
     if (now() >= self.lockedTill) {
 
       send(SendParameters{
-        to: self.nft,
+        to: self.nft!!,
         bounce: true,
         value: 0,
         mode: SendRemainingBalance + SendIgnoreErrors,
