@@ -99,24 +99,24 @@ contract Task4 with Deployable {
     } else {
       // nft не заблокирован, отправляем nft
 
-      // обнуляем Task4
-      // self.nft = null;
-      // self.owner = null;
-      // self.lockedTill = 0;
-
       send(SendParameters{
-        to: msg.nftAddress,
+        to: self.nft,
         value: 0,
         mode: SendRemainingBalance,
         body: Transfer {
           queryId: msg.queryId,
-          newOwner: sender(),
-          responseDestination: sender(), 
+          newOwner: self.owner,
+          responseDestination: self.owner, 
           customPayload: null, 
           forwardAmount: 0, 
           forwardPayload: emptySlice() 
         }.toCell()
       });
+
+            // обнуляем Task4
+      self.nft = null;
+      self.owner = null;
+      self.lockedTill = 0;
     }
   }
 
