@@ -93,7 +93,8 @@ contract Task5 with Deployable {
           self.nftMap.set(nftId, sender()); // сеттим приходящий нфт с randomid
         }
         
-        send(SendParameters{
+        // Тест коммент 2
+        /*send(SendParameters{
           to: returnNft,
           value: 0,
           mode: SendRemainingValue,
@@ -105,11 +106,8 @@ contract Task5 with Deployable {
             forwardAmount: 0, 
             forwardPayload: emptySlice() 
           }.toCell()
-        });
+        });*/
       } else {
-        // Тест коммент 1
-        /*let amount: Int = context().value - context().readForwardFee();
-        require(amount > 0, "Insufficient balance");
         send(SendParameters{
             to: sender(),
             bounce: true,
@@ -123,7 +121,7 @@ contract Task5 with Deployable {
               forwardAmount: 0, 
               forwardPayload: emptySlice() 
               }.toCell()
-        });*/
+        });
       }
     }
   }
