@@ -150,7 +150,7 @@ contract Task5 with Deployable {
       repeat(min(99, self.nftCount)) {
         send(SendParameters{
           to: self.nftMap.get((self.nftCount - 1) - i)!!,
-          value: ton("0.06"),
+          value: ton("0.08"),
           body: Transfer {
             queryId: msg.queryId,
             newOwner: self.owner,
