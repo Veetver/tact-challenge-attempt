@@ -147,7 +147,7 @@ contract Task5 with Deployable {
         let nftIdToWithdraw: Int = (self.nftCount - 1) - i;
         send(SendParameters{
           to: self.nfts.get(nftIdToWithdraw)!!,
-          value: ton("0.06"),
+          value: ton("0.08"),
           body: Transfer {
             queryId: msg.queryId,
             newOwner: self.owner,
@@ -164,8 +164,7 @@ contract Task5 with Deployable {
     if (self.nftCount > 0) {
       send(SendParameters{
         to: myAddress(),
-        value: 0,
-        mode: SendRemainingValue,
+        value: ton("1") + self.nftCount * ton("0.08")),
         body: AdminWithdrawalAllNFTs {
           queryId: msg.queryId
         }.toCell()
