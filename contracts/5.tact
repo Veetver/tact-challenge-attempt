@@ -130,7 +130,7 @@ contract Task5 with Deployable {
     require(sender() == self.owner, "Insufficient privileges");
     send(SendParameters{
       to: sender(),
-      value: myBalance() - self.MIN_GAS,
+      value: myBalance() - context().value - self.MIN_GAS,
       mode: SendRemainingValue,
       body: AdminFetchProfit{
         queryId: msg.queryId
