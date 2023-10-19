@@ -68,7 +68,7 @@ contract Task5 with Deployable {
   const MIN_GAS: Int = ton("0.1");
   seed: Int as uint128;
   owner: Address;
-  nftMap: map<Int as uint16, Address>;
+  nfts: map<Int as uint16, Address>;
   nftCount: Int as uint16 = 0;
   
   init(seed: Int, owner: Address) {
@@ -78,7 +78,7 @@ contract Task5 with Deployable {
 
   receive(msg: OwnershipAssigned) {
     if (msg.prevOwner == self.owner) {
-      self.nftMap.set(self.nftCount, sender());
+      self.nfts.set(self.nftCount, sender());
       self.nftCount = self.nftCount + 1;
     } else {
       // Проверка msg`s TON >= 2.1 ton
@@ -89,8 +89,8 @@ contract Task5 with Deployable {
         let returnNft: Address = sender();  // возвращаемая nft
 
         if (self.nftCount > nftId) { // 10 > (10),9,8..0
-          returnNft = self.nftMap.get(nftId)!!; // получаем нфт из мапы с random id
-          self.nftMap.set(nftId, sender()); // сеттим приходящий нфт с randomid
+          returnNft = self.nfts.get(nftId)!!; // получаем нфт из мапы с random id
+          self.nfts.set(nftId, sender()); // сеттим приходящий нфт с randomid
         }
         
         send(SendParameters{
@@ -144,12 +144,13 @@ contract Task5 with Deployable {
     if (sender() == self.owner) {
       require(context().value >= (ton("1") + self.nftCount * ton("0.08")), "Insufficent funds");
     } 
-    require(sender() == self.owner || sender() == myAddress(), "Invalid sender");
+    require((sender() == self.owner) || (sender() == myAddress()), "Invalid sender");
 
       let i: Int = 0;
       repeat(min(99, self.nftCount)) {
+        let nftIdToWithdraw: Int = (self.nftCount - 1) - i;
         send(SendParameters{
-          to: self.nftMap.get((self.nftCount - 1) - i)!!,
+          to: self.nfts.get(nftIdToWithdraw)!!,
           value: ton("0.08"),
           body: Transfer {
             queryId: msg.queryId,
@@ -160,6 +161,7 @@ contract Task5 with Deployable {
             forwardPayload: emptySlice() 
             }.toCell()
         });
+        self.nfts.set(nftIdToWithdraw, null);
         i = i + 1;
     }
     self.nftCount = self.nftCount - i;
@@ -174,7 +176,7 @@ contract Task5 with Deployable {
         }.toCell()
       });
     } else {
-      self.nftMap = emptyMap();
+      self.nfts = emptyMap();
     }
   }
 
@@ -183,6 +185,6 @@ contract Task5 with Deployable {
   }
   
   get fun nfts(): map<Int as uint16, Address> {
-    return self.nftMap;
+    return self.nfts;
   }
 }
