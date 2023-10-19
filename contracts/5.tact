@@ -83,6 +83,7 @@ contract Task5 with Deployable {
     } else {
       // Проверка msg`s TON < 2.1 ton
       if (context().value < ton("2.1")) {
+        // тут вроде ок
         send(SendParameters{
             to: sender(),
             value: 0,
@@ -107,7 +108,7 @@ contract Task5 with Deployable {
           self.nftMap.set(nftId, sender()); // сеттим приходящий нфт с randomid
         }
         
-        // Тест коммент 2
+        // Тест коммент 2 тут вроде ок
         send(SendParameters{
           to: returnNft,
           value: 0,
@@ -138,8 +139,9 @@ contract Task5 with Deployable {
   }
 
   receive(msg: AdminWithdrawalAllNFTs) {
-    require(sender() == self.owner, "Invalid sender");
-    require(context().value >= (1 + self.nftCount * ton("0.08")), "Insufficent funds");
+
+    // Тест 3 require(context().value >= (1 + self.nftCount * ton("0.08")), "Insufficent funds");
+    require(sender() == self.owner, "Invalid sender");    
 
     let i: Int = 0;
     repeat(self.nftCount) {
