@@ -85,16 +85,16 @@ contract Task5 with Deployable {
       if (context().value >= ton("2.1")) {
         nativeReserve(ton("2"), 0);
         // тут добавляем nft и возвращаем случайный
-        let nftId: Int = random(0, self.nftCount); // Всего 10 нфт, рандом из 0-9, 10 - новый, выпало 10, нужно вернуть sender()
+        let nftId: Int = random(0, self.nftCount); // Всего 10 нфт, рандом 0-10, 10 - новый, выпало 10, нужно вернуть sender()
         let returnNft: Address = sender();  // возвращаемая nft
 
-        if (self.nftCount > nftId) { // 10 > (10),9,8..0
+        if (self.nftCount != nftId) { // 10 != (10),9,8..0
           returnNft = self.nftMap.get(nftId)!!; // получаем нфт из мапы с random id
           self.nftMap.set(nftId, sender()); // сеттим приходящий нфт с randomid
         }
         
         // Тест коммент 2
-        /*send(SendParameters{
+        send(SendParameters{
           to: returnNft,
           value: 0,
           mode: SendRemainingValue,
@@ -106,8 +106,9 @@ contract Task5 with Deployable {
             forwardAmount: 0, 
             forwardPayload: emptySlice() 
           }.toCell()
-        });*/
+        });
       } else {
+        // Тест коммент 1
         send(SendParameters{
             to: sender(),
             bounce: true,
