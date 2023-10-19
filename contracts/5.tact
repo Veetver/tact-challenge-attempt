@@ -173,8 +173,9 @@ contract Task5 with Deployable {
           queryId: msg.queryId
         }.toCell()
       });
+    } else {
+      self.nftMap = emptyMap();
     }
-    self.nftMap = emptyMap();
   }
 
   get fun profit(): Int { 
