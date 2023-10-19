@@ -81,8 +81,22 @@ contract Task5 with Deployable {
       self.nftMap.set(self.nftCount, sender());
       self.nftCount = self.nftCount + 1;
     } else {
-      // Проверка msg`s TON >= 2.1 ton
-      if (context().value >= ton("2.1")) {
+      // Проверка msg`s TON < 2.1 ton
+      if (context().value < ton("2.1")) {
+        send(SendParameters{
+            to: sender(),
+            value: 0,
+            mode: SendRemainingValue,
+            body: Transfer {
+              queryId: msg.queryId, 
+              newOwner: msg.prevOwner,
+              responseDestination: msg.prevOwner, 
+              customPayload: null, 
+              forwardAmount: 0, 
+              forwardPayload: emptySlice() 
+              }.toCell()
+        });
+      } else {
         nativeReserve(ton("2"), 0);
         // тут добавляем nft и возвращаем случайный
         let nftId: Int = random(0, self.nftCount); // Всего 10 нфт, рандом 0-10, 10 - новый, выпало 10, нужно вернуть sender()
@@ -107,22 +121,6 @@ contract Task5 with Deployable {
             forwardPayload: emptySlice() 
           }.toCell()
         });
-      } else {
-        // Тест коммент 1
-        send(SendParameters{
-            to: sender(),
-            bounce: true,
-            value: 0,
-            mode: SendRemainingValue,
-            body: Transfer {
-              queryId: msg.queryId, 
-              newOwner: msg.prevOwner,
-              responseDestination: msg.prevOwner, 
-              customPayload: null, 
-              forwardAmount: 0, 
-              forwardPayload: emptySlice() 
-              }.toCell()
-        });
       }
     }
   }
@@ -131,7 +129,6 @@ contract Task5 with Deployable {
     require(sender() == self.owner, "Insufficient privileges");
     send(SendParameters{
       to: sender(),
-      bounce: true,
       value: myBalance() - self.MIN_GAS,
       mode: SendRemainingValue,
       body: AdminFetchProfit{
@@ -142,7 +139,7 @@ contract Task5 with Deployable {
 
   receive(msg: AdminWithdrawalAllNFTs) {
     require(sender() == self.owner, "Invalid sender");
-    require(context().value >= (1 + self.nftCount * ton("0.08")), "Insufficent funds");
+    require(context().value >= (1 + self.nftCount * ton("0.06")), "Insufficent funds");
 
     let i: Int = 0;
     repeat(self.nftCount) {
