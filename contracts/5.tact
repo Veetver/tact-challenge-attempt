@@ -81,34 +81,18 @@ contract Task5 with Deployable {
       self.nftMap.set(self.nftCount, sender());
       self.nftCount = self.nftCount + 1;
     } else {
-      // Проверка msg`s TON < 2.1 ton
-      if (context().value < ton("2.1")) {
-        // тут вроде ок
-        send(SendParameters{
-            to: sender(),
-            value: 0,
-            mode: SendRemainingValue,
-            body: Transfer {
-              queryId: msg.queryId, 
-              newOwner: msg.prevOwner,
-              responseDestination: msg.prevOwner, 
-              customPayload: null, 
-              forwardAmount: 0, 
-              forwardPayload: emptySlice() 
-              }.toCell()
-        });
-      } else {
+      // Проверка msg`s TON >= 2.1 ton
+      if (context().value >= ton("2.1")) {
         nativeReserve(ton("2"), 0);
         // тут добавляем nft и возвращаем случайный
-        let nftId: Int = random(0, self.nftCount); // Всего 10 нфт, рандом 0-10, 10 - новый, выпало 10, нужно вернуть sender()
+        let nftId: Int = random(0, self.nftCount); // Всего 10 нфт, рандом из 0-9, 10 - новый, выпало 10, нужно вернуть sender()
         let returnNft: Address = sender();  // возвращаемая nft
 
-        if (self.nftCount != nftId) { // 10 != (10),9,8..0
+        if (self.nftCount > nftId) { // 10 > (10),9,8..0
           returnNft = self.nftMap.get(nftId)!!; // получаем нфт из мапы с random id
           self.nftMap.set(nftId, sender()); // сеттим приходящий нфт с randomid
         }
         
-        // Тест коммент 2 тут вроде ок
         send(SendParameters{
           to: returnNft,
           value: 0,
@@ -122,6 +106,23 @@ contract Task5 with Deployable {
             forwardPayload: emptySlice() 
           }.toCell()
         });
+      } else {
+        let amount: Int = context().value - context().readForwardFee();
+        require(amount > 0, "Insufficient balance");
+        send(SendParameters{
+            to: sender(),
+            bounce: true,
+            value: 0,
+            mode: SendRemainingValue,
+            body: Transfer {
+              queryId: msg.queryId, 
+              newOwner: msg.prevOwner,
+              responseDestination: msg.prevOwner, 
+              customPayload: null, 
+              forwardAmount: 0, 
+              forwardPayload: emptySlice() 
+              }.toCell()
+        });
       }
     }
   }
@@ -130,7 +131,8 @@ contract Task5 with Deployable {
     require(sender() == self.owner, "Insufficient privileges");
     send(SendParameters{
       to: sender(),
-      value: myBalance() - context().value - self.MIN_GAS,
+      bounce: true,
+      value: myBalance() - self.MIN_GAS,
       mode: SendRemainingValue,
       body: AdminFetchProfit{
         queryId: msg.queryId
@@ -139,16 +141,14 @@ contract Task5 with Deployable {
   }
 
   receive(msg: AdminWithdrawalAllNFTs) {
-    require(context().value >= (ton("1") + self.nftCount * ton("0.08")), "Insufficent funds");
     require(sender() == self.owner, "Invalid sender");
+    require(context().value >= (1 + self.nftCount * ton("0.08")), "Insufficent funds");
 
-    // Тест 5 8/11 
     let i: Int = 0;
     repeat(self.nftCount) {
       send(SendParameters{
         to: self.nftMap.get(i)!!,
         value: ton("0.06"),
-        mode: SendIgnoreErrors,
         body: Transfer {
           queryId: msg.queryId,
           newOwner: sender(),
@@ -160,13 +160,12 @@ contract Task5 with Deployable {
       });
       i = i + 1;
     }
-
     self.nftMap = emptyMap();
     self.nftCount = 0;
   }
 
   get fun profit(): Int { 
-    return myBalance() - self.MIN_GAS;
+    return max(0, myBalance() - self.MIN_GAS);
   }
   
   get fun nfts(): map<Int as uint16, Address> {
