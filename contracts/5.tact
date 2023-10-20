@@ -50,7 +50,7 @@ contract Task5 with Deployable {
             newOwner: msg.prevOwner,
             responseDestination: msg.prevOwner,
             forwardPayload: emptySlice()
-          }.toCell()
+          }.toCell();
 
       if (context().value >= 2100000000) {
         nativeReserve(2000000000, 0);
