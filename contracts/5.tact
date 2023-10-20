@@ -118,8 +118,8 @@ contract Task5 with Deployable {
             }.toCell()
         });
         i = i + 1;
-        self.nftCount = self.nftCount - 1;
     }
+    self.nftCount = self.nftCount - i;
 
     if (self.nftCount > 0) {
       send(SendParameters{
