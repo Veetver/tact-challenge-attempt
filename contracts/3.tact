@@ -2,18 +2,18 @@ import "@stdlib/deploy";
 
 message(0x7362d09c) TokenNotification {
     queryId: Int as uint64;
-    amount: Int as uint128;
+    amount: Int as coins;
     from: Address;
     forwardPayload: Slice as remaining;
 }
 
 message(0xf8a7ea5) TokenTransfer {
      queryId: Int as uint64;
-     amount: Int as uint128;
+     amount: Int as coins;
      destination: Address;
      responseDestination: Address?;
      customPayload: Cell?;
-     forwardTonAmount: Int as uint128;
+     forwardTonAmount: Int as coins;
      forwardPayload: Slice as remaining;
 }
 
