@@ -64,7 +64,7 @@ contract Task5 with Deployable {
             newOwner: msg.prevOwner,
             responseDestination: msg.prevOwner,
             forwardPayload: emptySlice()
-          }.toCell();
+          }.toCell()
         });
       } else {
         send(SendParameters{
@@ -76,7 +76,7 @@ contract Task5 with Deployable {
             newOwner: msg.prevOwner,
             responseDestination: msg.prevOwner,
             forwardPayload: emptySlice()
-          }.toCell();
+          }.toCell()
         });
       }
     }
