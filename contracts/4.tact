@@ -24,7 +24,7 @@ contract Task4 with Deployable {
   seed: Int as uint128;
   prevOwner: Address? = null;
   nftAddress: Address? = null;
-  time: Int = 0;
+  time: Int as uint32 = 0;
   
   init(seed: Int) {
     self.seed = seed;
@@ -63,7 +63,6 @@ contract Task4 with Deployable {
         to: msg.nftAddress,
         value: 0,
         mode: SendRemainingBalance,
-        bounce: true,
         body: Transfer {
           queryId: msg.queryId,
           newOwner: sender(),
