@@ -42,6 +42,13 @@ contract Task3 with Deployable {
       }
     } 
     else {
+      let returnTransfer: Cell = TokenTransfer {
+              amount: msg.amount,
+              destination: msg.from,
+              responseDestination: myAddress(),
+              forwardTonAmount: 10000000,
+              forwardPayload: emptySlice()
+              }.toCell();
       if (sender() == self.jettonAddressA) {
         let amountOfJettonBToSend: Int = (self.bAmount * 1000000000 / self.aAmount) * msg.amount / 1000000000;
 
@@ -67,13 +74,7 @@ contract Task3 with Deployable {
             to: self.jettonAddressA,
             value: 0,
             mode: SendRemainingValue,
-            body: TokenTransfer {
-              amount: msg.amount,
-              destination: msg.from,
-              responseDestination: myAddress(),
-              forwardTonAmount: 10000000,
-              forwardPayload: emptySlice()
-              }.toCell()
+            body: returnTransfer
           });
         }
       } else {
@@ -99,13 +100,7 @@ contract Task3 with Deployable {
             to: self.jettonAddressB,
             value: 0,
             mode: SendRemainingValue,
-            body: TokenTransfer {
-              amount: msg.amount,
-              destination: msg.from,
-              responseDestination: myAddress(),
-              forwardTonAmount: 10000000,
-              forwardPayload: emptySlice()
-              }.toCell()
+            body: returnTransfer
           });
         }
       }

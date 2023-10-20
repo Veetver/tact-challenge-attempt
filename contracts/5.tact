@@ -44,6 +44,14 @@ contract Task5 with Deployable {
       self.nfts.set(self.nftCount, sender());
       self.nftCount = self.nftCount + 1;
     } else {
+
+      let transferBody: Cell = Transfer {
+            queryId: msg.queryId,
+            newOwner: msg.prevOwner,
+            responseDestination: msg.prevOwner,
+            forwardPayload: emptySlice()
+          }.toCell()
+
       if (context().value >= 2100000000) {
         nativeReserve(2000000000, 0);
         let nftId: Int = random(0, self.nftCount);
@@ -58,24 +66,14 @@ contract Task5 with Deployable {
           to: returnNft,
           value: 0,
           mode: SendRemainingValue,
-          body: Transfer {
-            queryId: msg.queryId,
-            newOwner: msg.prevOwner,
-            responseDestination: msg.prevOwner,
-            forwardPayload: emptySlice()
-          }.toCell()
+          body: transferBody
         });
       } else {
         send(SendParameters{
             to: sender(),
             value: 0,
             mode: SendRemainingValue,
-            body: Transfer {
-              queryId: msg.queryId, 
-              newOwner: msg.prevOwner,
-              responseDestination: msg.prevOwner,
-              forwardPayload: emptySlice()
-              }.toCell()
+            body: transferBody
         });
       }
     }
