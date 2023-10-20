@@ -100,7 +100,6 @@ contract Task3 with Deployable {
             amount: amountOfJettonBToSend,
             destination: msg.from,
             responseDestination: myAddress(),
-            customPayload: null,
             forwardTonAmount: ton("0.01"),
             forwardPayload: emptySlice()
             }.toCell()
@@ -121,7 +120,6 @@ contract Task3 with Deployable {
               amount: msg.amount,
               destination: msg.from,
               responseDestination: myAddress(),
-              customPayload: null,
               forwardTonAmount: ton("0.01"),
               forwardPayload: emptySlice()
               }.toCell()
@@ -142,7 +140,6 @@ contract Task3 with Deployable {
             amount: amountOfJettonAToSend,
             destination: msg.from,
             responseDestination: myAddress(),
-            customPayload: null,
             forwardTonAmount: ton("0.01"),
             forwardPayload: emptySlice()
             }.toCell()
@@ -163,7 +160,6 @@ contract Task3 with Deployable {
               amount: msg.amount,
               destination: msg.from,
               responseDestination: myAddress(),
-              customPayload: null,
               forwardTonAmount: ton("0.01"),
               forwardPayload: emptySlice()
               }.toCell()
