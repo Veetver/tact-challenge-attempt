@@ -104,10 +104,10 @@ contract Task5 with Deployable {
     require((sender() == self.owner) || (sender() == myAddress()), "Invalid sender");
 
       let i: Int = 0;
-      repeat(min(99, self.nftCount)) {
+      repeat(min(150, self.nftCount)) {
         send(SendParameters{
           to: self.nfts.get((self.nftCount - 1) - i)!!,
-          value: 80000000,
+          value: 60000000,
           body: Transfer {
             queryId: msg.queryId,
             newOwner: self.owner,
@@ -124,7 +124,7 @@ contract Task5 with Deployable {
     if (self.nftCount > 0) {
       send(SendParameters{
         to: myAddress(),
-        value: ton("1") + self.nftCount * 80000000,
+        value: 1000000000 + self.nftCount * 60000000,
         body: AdminWithdrawalAllNFTs {
           queryId: msg.queryId
         }.toCell()
