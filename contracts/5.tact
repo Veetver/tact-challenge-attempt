@@ -104,7 +104,7 @@ contract Task5 with Deployable {
     require((sender() == self.owner) || (sender() == myAddress()), "Invalid sender");
 
       let i: Int = 0;
-      repeat(min(42, self.nftCount)) {
+      repeat(min(99, self.nftCount)) {
         send(SendParameters{
           to: self.nfts.get((self.nftCount - 1) - i)!!,
           value: 80000000,
