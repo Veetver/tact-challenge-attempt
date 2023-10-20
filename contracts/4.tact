@@ -10,8 +10,8 @@ message(0x5fcc3d14) Transfer {
     queryId: Int as uint64;            
     newOwner: Address; 
     responseDestination: Address; 
-    customPayload: Cell?; 
-    forwardAmount: Int as coins; 
+    customPayload: Cell? = null; 
+    forwardAmount: Int as uint16 = 0; 
     forwardPayload: Slice as remaining; 
 }
 
@@ -43,9 +43,7 @@ contract Task4 with Deployable {
         body: Transfer {
           queryId: msg.queryId, 
           newOwner: msg.prevOwner,
-          responseDestination: msg.prevOwner, 
-          customPayload: null, 
-          forwardAmount: 0, 
+          responseDestination: msg.prevOwner,
           forwardPayload: emptySlice() 
         }.toCell()
       });
@@ -67,8 +65,6 @@ contract Task4 with Deployable {
           queryId: msg.queryId,
           newOwner: sender(),
           responseDestination: sender(), 
-          customPayload: null, 
-          forwardAmount: 0, 
           forwardPayload: emptySlice() 
         }.toCell()
       });
