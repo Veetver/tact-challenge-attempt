@@ -19,11 +19,10 @@ message(0xf8a7ea5) TokenTransfer {
 
 contract Task3 with Deployable {
   owner: Address;
-  aAmount: Int;
-  bAmount: Int;
+  aAmount: Int as coins;
+  bAmount: Int as coins;
   jettonAddressA: Address;
   jettonAddressB: Address;
-  decimal: Int;
 
   init(admin: Address, newJettonAddressA: Address, newJettonAddressB: Address) {
     self.owner = admin;
@@ -31,7 +30,6 @@ contract Task3 with Deployable {
     self.jettonAddressB = newJettonAddressB;
     self.aAmount = 0;
     self.bAmount = 0;
-    self.decimal = 1000000000;
   }
 
   receive(msg: TokenNotification) {
@@ -45,7 +43,7 @@ contract Task3 with Deployable {
     } 
     else {
       if (sender() == self.jettonAddressA) {
-        let amountOfJettonBToSend: Int = self.bAmount * msg.amount / self.aAmount;
+        let amountOfJettonBToSend: Int = (self.bAmount * 1000000000 / self.aAmount) * msg.amount / 1000000000;
 
         if (self.bAmount >= amountOfJettonBToSend) {
           send(SendParameters{
@@ -58,7 +56,7 @@ contract Task3 with Deployable {
             destination: msg.from,
             responseDestination: myAddress(),
             customPayload: null,
-            forwardTonAmount: ton("0.01"),
+            forwardTonAmount: 10000000,
             forwardPayload: emptySlice()
             }.toCell()
           });
@@ -76,13 +74,13 @@ contract Task3 with Deployable {
               destination: msg.from,
               responseDestination: myAddress(),
               customPayload: null,
-              forwardTonAmount: ton("0.01"),
+              forwardTonAmount: 10000000,
               forwardPayload: emptySlice()
               }.toCell()
           });
         }
       } else {
-        let amountOfJettonAToSend: Int = self.aAmount * msg.amount / self.bAmount;
+        let amountOfJettonAToSend: Int = (self.aAmount * 1000000000 / self.bAmount) * msg.amount / 1000000000;
         if (self.aAmount >= amountOfJettonAToSend) {
           send(SendParameters{
           to: self.jettonAddressA,
@@ -94,7 +92,7 @@ contract Task3 with Deployable {
             destination: msg.from,
             responseDestination: myAddress(),
             customPayload: null,
-            forwardTonAmount: ton("0.01"),
+            forwardTonAmount: 10000000,
             forwardPayload: emptySlice()
             }.toCell()
           });
@@ -112,7 +110,7 @@ contract Task3 with Deployable {
               destination: msg.from,
               responseDestination: myAddress(),
               customPayload: null,
-              forwardTonAmount: ton("0.01"),
+              forwardTonAmount: 10000000,
               forwardPayload: emptySlice()
               }.toCell()
           });
@@ -123,9 +121,9 @@ contract Task3 with Deployable {
   
   get fun price(jetton: Address): Int {
     if (jetton == self.jettonAddressA) {
-      return self.bAmount * self.decimal / self.aAmount;
+      return self.bAmount * 1000000000 / self.aAmount;
     } else {
-      return self.aAmount * self.decimal / self.bAmount;
+      return self.aAmount * 1000000000 / self.bAmount;
     }
   }
   
