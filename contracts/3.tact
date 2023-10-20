@@ -121,6 +121,7 @@ contract Task3 with Deployable {
               amount: msg.amount,
               destination: msg.from,
               responseDestination: myAddress(),
+              customPayload: null,
               forwardTonAmount: ton("0.01"),
               forwardPayload: emptySlice()
               }.toCell()
@@ -141,6 +142,7 @@ contract Task3 with Deployable {
             amount: amountOfJettonAToSend,
             destination: msg.from,
             responseDestination: myAddress(),
+            customPayload: null,
             forwardTonAmount: ton("0.01"),
             forwardPayload: emptySlice()
             }.toCell()
@@ -161,6 +163,7 @@ contract Task3 with Deployable {
               amount: msg.amount,
               destination: msg.from,
               responseDestination: myAddress(),
+              customPayload: null,
               forwardTonAmount: ton("0.01"),
               forwardPayload: emptySlice()
               }.toCell()
@@ -173,16 +176,20 @@ contract Task3 with Deployable {
   get fun price(jetton: Address): Int {
     if (jetton == self.jettonAddressA) {
       return self.bAmount * self.decimal / self.aAmount;
-    } else {
+    }
+    if (jetton == self.jettonAddressB) {
       return self.aAmount * self.decimal / self.bAmount;
     }
+    return -1;
   }
   
   get fun balance(jetton: Address): Int { 
     if (jetton == self.jettonAddressA) {
       return self.aAmount;
-    } else {
+    }
+    if (jetton == self.jettonAddressB) {
       return self.bAmount;
     }
+    return -1;
   }
 }
