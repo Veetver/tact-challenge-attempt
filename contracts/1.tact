@@ -1,6 +1,6 @@
 import "@stdlib/deploy";
 message Add {
-  queryId: Int as uint64;
+  queryId: Int as uint32;
   number: Int as uint32;
 }
 message Subtract {
