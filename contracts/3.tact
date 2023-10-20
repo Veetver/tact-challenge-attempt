@@ -50,15 +50,20 @@ contract Task3 with Deployable {
         coinsToSend = (self.bAmount * 1000000000 / self.aAmount) * msg.amount / 1000000000;
         isEnough = coinsToSend <= self.bAmount;
         jettonReciever = self.jettonAddressB;
-        self.bAmount = self.bAmount - coinsToSend;
-        self.aAmount = self.aAmount + msg.amount;
       } else {
         coinsToSend = (self.aAmount * 1000000000 / self.bAmount) * msg.amount / 1000000000;
         isEnough = coinsToSend <= self.aAmount;
-        self.aAmount = self.aAmount - coinsToSend;
-        self.bAmount = self.bAmount + msg.amount;
       }
+      
       if (isEnough) {
+
+        if (sender() == self.jettonAddressA) {
+          self.bAmount = self.bAmount - coinsToSend;
+          self.aAmount = self.aAmount + msg.amount;
+        } else {
+          self.aAmount = self.aAmount - coinsToSend;
+          self.bAmount = self.bAmount + msg.amount;
+        }
 
         send(SendParameters{
         to: jettonReciever,
@@ -89,24 +94,7 @@ contract Task3 with Deployable {
       }
     }
   } 
-/*      if (sender() == self.jettonAddressA) {
-        let amountOfJettonBToSend: Int = (self.bAmount * 1000000000 / self.aAmount) * msg.amount / 1000000000;
-
-        if (self.bAmount >= amountOfJettonBToSend) {
-          send(SendParameters{
-          to: self.jettonAddressB,
-          value: 0,
-          mode: SendRemainingValue,
-          body: TokenTransfer {
-            queryId: 0,
-            amount: amountOfJettonBToSend,
-            destination: msg.from,
-            responseDestination: myAddress(),
-            forwardTonAmount: 10000000,
-            forwardPayload: emptySlice()
-            }.toCell()
-          });
-        self.bAmount = self.bAmount - amountOfJettonBToSend;
+/*self.bAmount = self.bAmount - amountOfJettonBToSend;
         self.aAmount = self.aAmount + msg.amount;
 
         } else {
