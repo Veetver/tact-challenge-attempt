@@ -14,14 +14,14 @@ contract Task2 with Deployable {
     send(SendParameters{
       to: msg.sender,
       value: 0,
-      mode: SendRemainingValue + SendIgnoreErrors
+      mode: SendRemainingValue
     });
   }
   receive(msg: Slice) {
     send(SendParameters{
       to: self.admin,
       value: 0,
-      mode: SendRemainingValue + SendIgnoreErrors,
+      mode: SendRemainingValue,
       body: beginCell().storeRef(msg.asCell()).storeAddress(sender()).endCell()
     });
   }
