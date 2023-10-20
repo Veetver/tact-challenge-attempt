@@ -1,11 +1,11 @@
 import "@stdlib/deploy";
 message Add {
   queryId: Int as uint16;
-  number: Int as uint32;
+  number: Int as uint16;
 }
 message Subtract {
   queryId: Int as uint16;
-  number: Int as uint32;
+  number: Int as uint16;
 }
 
 contract Task1 with Deployable {
