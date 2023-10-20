@@ -24,7 +24,7 @@ message(0x5fcc3d14) Transfer {
     newOwner: Address; 
     responseDestination: Address; 
     customPayload: Cell?; 
-    forwardAmount: Int as coins; 
+    forwardAmount: Int as uint128; 
     forwardPayload: Slice as remaining; 
 }
 
