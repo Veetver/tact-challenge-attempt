@@ -42,7 +42,54 @@ contract Task3 with Deployable {
       }
     } 
     else {
+      let coinsToSend: Int = 0;
+      let isEnough: Bool = false;
+      let jettonReciever: Address = self.jettonAddressA;
+
       if (sender() == self.jettonAddressA) {
+        coinsToSend = (self.bAmount * 1000000000 / self.aAmount) * msg.amount / 1000000000;
+        isEnough = coinsToSend <= self.bAmount;
+        jettonReciever = self.jettonAddressB;
+        self.bAmount = self.bAmount - coinsToSend;
+        self.aAmount = self.aAmount + msg.amount;
+      } else {
+        coinsToSend = (self.aAmount * 1000000000 / self.bAmount) * msg.amount / 1000000000;
+        isEnough = coinsToSend <= self.aAmount;
+        self.aAmount = self.aAmount - coinsToSend;
+        self.bAmount = self.bAmount + msg.amount;
+      }
+      if (isEnough) {
+
+        send(SendParameters{
+        to: jettonReciever,
+        value: 0,
+        mode: SendRemainingValue,
+        body: TokenTransfer {
+          amount: coinsToSend,
+          destination: msg.from,
+          responseDestination: myAddress(),
+          forwardTonAmount: 10000000,
+          forwardPayload: emptySlice()
+          }.toCell()
+      });
+
+      } else {
+        send(SendParameters{
+        to: sender(),
+        value: 0,
+        mode: SendRemainingValue,
+        body: TokenTransfer {
+          amount: msg.amount,
+          destination: msg.from,
+          responseDestination: myAddress(),
+          forwardTonAmount: 10000000,
+          forwardPayload: emptySlice()
+          }.toCell()
+      });
+      }
+    }
+  } 
+/*      if (sender() == self.jettonAddressA) {
         let amountOfJettonBToSend: Int = (self.bAmount * 1000000000 / self.aAmount) * msg.amount / 1000000000;
 
         if (self.bAmount >= amountOfJettonBToSend) {
@@ -110,7 +157,7 @@ contract Task3 with Deployable {
         }
       }
     }
-  } 
+  } */
   
   get fun price(jetton: Address): Int {
     if (jetton == self.jettonAddressA) {
