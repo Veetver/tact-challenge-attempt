@@ -8,13 +8,13 @@ message(0x7362d09c) TokenNotification {
 }
 
 message(0xf8a7ea5) TokenTransfer {
-     queryId: Int as uint64;
+     queryId: Int as uint64 = 0;
      amount: Int as coins;
      destination: Address;
      responseDestination: Address?;
-     customPayload: Cell?;
+     customPayload: Cell? = null;
      forwardTonAmount: Int as coins;
-     forwardPayload: Slice as remaining;
+     forwardPayload: Slice as remaining = emptySlice();
 }
 
 contract Task3 with Deployable {
@@ -55,9 +55,7 @@ contract Task3 with Deployable {
             amount: amountOfJettonBToSend,
             destination: msg.from,
             responseDestination: myAddress(),
-            customPayload: null,
-            forwardTonAmount: 10000000,
-            forwardPayload: emptySlice()
+            forwardTonAmount: 10000000
             }.toCell()
           });
         self.bAmount = self.bAmount - amountOfJettonBToSend;
@@ -69,13 +67,10 @@ contract Task3 with Deployable {
             value: 0,
             mode: SendRemainingValue,
             body: TokenTransfer {
-              queryId: 0,
               amount: msg.amount,
               destination: msg.from,
               responseDestination: myAddress(),
-              customPayload: null,
-              forwardTonAmount: 10000000,
-              forwardPayload: emptySlice()
+              forwardTonAmount: 10000000
               }.toCell()
           });
         }
@@ -87,13 +82,10 @@ contract Task3 with Deployable {
           value: 0,
           mode: SendRemainingValue,
           body: TokenTransfer {
-            queryId: 0,
             amount: amountOfJettonAToSend,
             destination: msg.from,
             responseDestination: myAddress(),
-            customPayload: null,
-            forwardTonAmount: 10000000,
-            forwardPayload: emptySlice()
+            forwardTonAmount: 10000000
             }.toCell()
           });
           self.bAmount = self.bAmount + msg.amount;
@@ -105,13 +97,10 @@ contract Task3 with Deployable {
             value: 0,
             mode: SendRemainingValue,
             body: TokenTransfer {
-              queryId: 0,
               amount: msg.amount,
               destination: msg.from,
               responseDestination: myAddress(),
-              customPayload: null,
-              forwardTonAmount: 10000000,
-              forwardPayload: emptySlice()
+              forwardTonAmount: 10000000
               }.toCell()
           });
         }

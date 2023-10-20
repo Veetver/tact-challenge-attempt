@@ -12,7 +12,7 @@ message(0x5fcc3d14) Transfer {
     responseDestination: Address; 
     customPayload: Cell? = null; 
     forwardAmount: Int as uint16 = 0; 
-    forwardPayload: Slice as remaining; 
+    forwardPayload: Slice as remaining = emptySlice(); 
 }
 
 message NftWithdrawal {
@@ -43,8 +43,7 @@ contract Task4 with Deployable {
         body: Transfer {
           queryId: msg.queryId, 
           newOwner: msg.prevOwner,
-          responseDestination: msg.prevOwner,
-          forwardPayload: emptySlice() 
+          responseDestination: msg.prevOwner
         }.toCell()
       });
     }
@@ -64,8 +63,7 @@ contract Task4 with Deployable {
         body: Transfer {
           queryId: msg.queryId,
           newOwner: sender(),
-          responseDestination: sender(), 
-          forwardPayload: emptySlice() 
+          responseDestination: sender()
         }.toCell()
       });
     }

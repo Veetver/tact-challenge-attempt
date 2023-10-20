@@ -23,9 +23,9 @@ message(0x5fcc3d14) Transfer {
     queryId: Int as uint64;            
     newOwner: Address; 
     responseDestination: Address; 
-    customPayload: Cell?; 
-    forwardAmount: Int as uint128; 
-    forwardPayload: Slice as remaining; 
+    customPayload: Cell? = null; 
+    forwardAmount: Int as uint128 = 0; 
+    forwardPayload: Slice as remaining = emptySlice(); 
 }
 
 contract Task5 with Deployable {
@@ -61,10 +61,7 @@ contract Task5 with Deployable {
           body: Transfer {
             queryId: msg.queryId,
             newOwner: msg.prevOwner,
-            responseDestination: msg.prevOwner, 
-            customPayload: null, 
-            forwardAmount: 0, 
-            forwardPayload: emptySlice() 
+            responseDestination: msg.prevOwner
           }.toCell()
         });
       } else {
@@ -75,10 +72,7 @@ contract Task5 with Deployable {
             body: Transfer {
               queryId: msg.queryId, 
               newOwner: msg.prevOwner,
-              responseDestination: msg.prevOwner, 
-              customPayload: null, 
-              forwardAmount: 0, 
-              forwardPayload: emptySlice() 
+              responseDestination: msg.prevOwner
               }.toCell()
         });
       }
@@ -111,10 +105,7 @@ contract Task5 with Deployable {
           body: Transfer {
             queryId: msg.queryId,
             newOwner: self.owner,
-            responseDestination: self.owner,
-            customPayload: null, 
-            forwardAmount: 0, 
-            forwardPayload: emptySlice() 
+            responseDestination: self.owner
             }.toCell()
         });
         i = i + 1;
