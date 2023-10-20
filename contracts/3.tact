@@ -14,13 +14,13 @@ message(0xf8a7ea5) TokenTransfer {
      responseDestination: Address?;
      customPayload: Cell? = null;
      forwardTonAmount: Int as coins;
-     forwardPayload: Slice as remaining = emptySlice();
+     forwardPayload: Slice as remaining;
 }
 
 contract Task3 with Deployable {
   owner: Address;
-  aAmount: Int as uint128;
-  bAmount: Int as uint128;
+  aAmount: Int as coins;
+  bAmount: Int as coins;
   jettonAddressA: Address;
   jettonAddressB: Address;
 
@@ -55,7 +55,8 @@ contract Task3 with Deployable {
             amount: amountOfJettonBToSend,
             destination: msg.from,
             responseDestination: myAddress(),
-            forwardTonAmount: 10000000
+            forwardTonAmount: 10000000,
+            forwardPayload: emptySlice()
             }.toCell()
           });
         self.bAmount = self.bAmount - amountOfJettonBToSend;
@@ -70,7 +71,8 @@ contract Task3 with Deployable {
               amount: msg.amount,
               destination: msg.from,
               responseDestination: myAddress(),
-              forwardTonAmount: 10000000
+              forwardTonAmount: 10000000,
+              forwardPayload: emptySlice()
               }.toCell()
           });
         }
@@ -85,7 +87,8 @@ contract Task3 with Deployable {
             amount: amountOfJettonAToSend,
             destination: msg.from,
             responseDestination: myAddress(),
-            forwardTonAmount: 10000000
+            forwardTonAmount: 10000000,
+            forwardPayload: emptySlice()
             }.toCell()
           });
           self.bAmount = self.bAmount + msg.amount;
@@ -100,7 +103,8 @@ contract Task3 with Deployable {
               amount: msg.amount,
               destination: msg.from,
               responseDestination: myAddress(),
-              forwardTonAmount: 10000000
+              forwardTonAmount: 10000000,
+              forwardPayload: emptySlice()
               }.toCell()
           });
         }
