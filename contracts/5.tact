@@ -1,5 +1,6 @@
 import "@stdlib/deploy";
 
+
 message AdminWithdrawalProfit {
   queryId: Int as uint64;
 }
@@ -28,6 +29,7 @@ message(0x5fcc3d14) Transfer {
 }
 
 contract Task5 with Deployable {
+  const MIN_GAS: Int = ton("0.1");
   seed: Int as uint128;
   owner: Address;
   nfts: map<Int as uint16, Address>;
@@ -43,8 +45,8 @@ contract Task5 with Deployable {
       self.nfts.set(self.nftCount, sender());
       self.nftCount = self.nftCount + 1;
     } else {
-      if (context().value >= 2100000000) {
-        nativeReserve(2000000000, 0);
+      if (context().value >= ton("2.1")) {
+        nativeReserve(ton("2"), 0);
         let nftId: Int = random(0, self.nftCount);
         let returnNft: Address = sender();
 
@@ -88,7 +90,7 @@ contract Task5 with Deployable {
     require(sender() == self.owner, "Insufficient privileges");
     send(SendParameters{
       to: sender(),
-      value: myBalance() - 100000000,
+      value: myBalance() - self.MIN_GAS,
       mode: SendRemainingValue,
       body: AdminFetchProfit{
         queryId: msg.queryId
@@ -98,7 +100,7 @@ contract Task5 with Deployable {
 
   receive(msg: AdminWithdrawalAllNFTs) {
     if (sender() == self.owner) {
-      require(context().value >= (1000000000 + self.nftCount * 80000000), "Insufficent funds");
+      require(context().value >= (ton("1") + self.nftCount * ton("0.08")), "Insufficent funds");
     } 
     require((sender() == self.owner) || (sender() == myAddress()), "Invalid sender");
 
@@ -106,7 +108,7 @@ contract Task5 with Deployable {
       repeat(min(42, self.nftCount)) {
         send(SendParameters{
           to: self.nfts.get((self.nftCount - 1) - i)!!,
-          value: 80000000,
+          value: ton("0.08"),
           body: Transfer {
             queryId: msg.queryId,
             newOwner: self.owner,
@@ -123,7 +125,7 @@ contract Task5 with Deployable {
     if (self.nftCount > 0) {
       send(SendParameters{
         to: myAddress(),
-        value: SendRemainingBalance,
+        value: ton("1") + self.nftCount * ton("0.08"),
         body: AdminWithdrawalAllNFTs {
           queryId: msg.queryId
         }.toCell()
@@ -134,7 +136,7 @@ contract Task5 with Deployable {
   }
 
   get fun profit(): Int { 
-    return max(0, myBalance() - 100000000);
+    return max(0, myBalance() - self.MIN_GAS);
   }
   
   get fun nfts(): map<Int as uint16, Address> {
