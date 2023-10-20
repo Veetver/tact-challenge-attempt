@@ -108,7 +108,7 @@ contract Task5 with Deployable {
             forwardPayload: emptySlice()
             }.toCell()
         });
-        self.nftCount = nftCount - 1;
+        self.nftCount = self.nftCount - 1;
     }
 
     if (self.nftCount > 0) {
