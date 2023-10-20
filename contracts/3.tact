@@ -8,7 +8,7 @@ message(0x7362d09c) TokenNotification {
 }
 
 message(0xf8a7ea5) TokenTransfer {
-     queryId: Int as uint32 = 0;
+     queryId: Int as uint64 = 0;
      amount: Int as coins;
      destination: Address;
      responseDestination: Address?;
